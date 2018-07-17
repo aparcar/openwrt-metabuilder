@@ -4,22 +4,21 @@
 
 set -e
 
-ROOT_DIR="${ROOT_DIR:-$PWD}"
-DISTRO="${DISTRO:-openwrt}"
-RELEASE="${RELEASE:-17.01.4}"
-TARGET="${TARGET:-ar71xx/generic}"
-BASE_URL="${BASE_URL:-https://downloads.openwrt.org}"
-BASE_PATH="$DISTRO/$RELEASE/$TARGET"
-IB_DIR="$ROOT_DIR/imagebuilder/$BASE_PATH"
-BIN_DIR="${BIN_DIR:-$ROOT_DIR/bin/$BASE_PATH}"
-
-IB="imagebuilder"
+ROOT_DIR="$PWD"                 # where the script is
+DISTRO="${DISTRO:-openwrt}"     # the folder where to store created files
+RELEASE="${RELEASE:-17.01.4}"   # default release
+BASE_URL="${BASE_URL:-https://downloads.openwrt.org}" # download imagebuilders
+BASE_PATH="$DISTRO/$RELEASE/$TARGET"            # structure for storing stuff
+IB_DIR="$ROOT_DIR/imagebuilder/$BASE_PATH"      # where to store imagebuilders
+BIN_DIR="${BIN_DIR:-$ROOT_DIR/bin/$BASE_PATH}"  # where to store created images
+IB="imagebuilder"   # search sha256sums for this string to find imagebuilder
 
 
-[ "$RELEASE" != "snapshots" ] && {
+[ "$RELEASE" != "snapshots" ] && [ -z "$SNAPSHOTS" ] && {
     TARGETS_URL="$BASE_URL/releases/$RELEASE/targets/$TARGET"
 } || {
     TARGETS_URL="$BASE_URL/snapshots/targets/$TARGET"
+    RELEASE="snapshots"
     SNAPSHOTS=1
 }
 
@@ -45,7 +44,7 @@ download_ib() {
 	wget "$TARGETS_URL/sha256sums.gpg" -O sha256sums.asc
 
 	# LEDE Build System (LEDE GnuPG key for unattended build jobs)
-	gpg --import $ROOT_DIR/keys/626471F1.asc
+	gpg --import "$ROOT_DIR/keys/626471F1.asc"
 	echo '54CC74307A2C6DC9CE618269CD84BCED626471F1:6:' | gpg --import-ownertrust
 	# LEDE Release Builder (17.01 "Reboot" Signing Key)
 	gpg --import $ROOT_DIR/keys/D52BBB6B.asc
@@ -67,7 +66,7 @@ download_ib() {
 		echo_blue "=== sha256 doesn't match or ImageBuilder file wasn't downloaded yet."
 		echo_blue "=== Downloading a fresh version"
 		wget "$TARGETS_URL/$ib_file" -O "$ib_file"
-        tar Jxf "$IB_DIR/$(get_ib_file)" --strip=1
+        tar Jxf "$IB_DIR/$ib_file" --strip=1
 	fi
 
 	# check again and fail here if the file is still bad
@@ -86,18 +85,23 @@ download_ib() {
 
 }
 
-image() {
-    # download imagebuilder if not existent or likely outdated
-    [ ! -e "$IB_DIR/Makefile" -o -n "$SNAPSHOTS" ] && download_ib
-
-    cd "$IB_DIR"
-    # run `make image` and pass variables
-    make image \
-        PROFILE="$PROFILE" \
-        PACKAGES="$PACKAGES" \
-        BIN_DIR="$BIN_DIR" \
-        EXTRA_IMAGE_NAME="$EXTRA_IMAGE_NAME"
+die() {
+    echo_red $1
+    exit 1
 }
 
-$@
+# check if required vars a given
+[ -n "$TARGET" ] || die "missing $\$TARGET"
+[ -n "$PROFILE" ] || die "missing \$PROFILE"
 
+# download imagebuilder if not existent or likely outdated
+[ ! -e "$IB_DIR/Makefile" -o -n "$SNAPSHOTS" ] && download_ib
+
+# run `make image` and pass variables
+(cd "$IB_DIR" &&
+make image \
+    PROFILE="$PROFILE" \
+    PACKAGES="$PACKAGES" \
+    BIN_DIR="$BIN_DIR" \
+    EXTRA_IMAGE_NAME="$EXTRA_IMAGE_NAME"
+)
