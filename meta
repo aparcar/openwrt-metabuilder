@@ -35,7 +35,7 @@ get_ib_file() {
 	fi
 }
 
-download_ib() {
+download() {
 	mkdir -p "$IB_DIR"
 	cd "$IB_DIR"
 
@@ -93,7 +93,7 @@ die() {
 image() {
     [ -n "$PROFILE" ] || die "missing \$PROFILE"
     # download imagebuilder if not existent or likely outdated
-    [ ! -e "$IB_DIR/Makefile" -o -n "$SNAPSHOTS" ] && download_ib
+    [ ! -e "$IB_DIR/Makefile" -o -n "$SNAPSHOTS" ] && download
 
     # run `make image` and pass variables
     (cd "$IB_DIR" &&
@@ -107,13 +107,13 @@ image() {
 
 package_list() {
     # download imagebuilder if not existent or likely outdated
-    [ ! -e "$IB_DIR/Makefile" -o -n "$SNAPSHOTS" ] && download_ib > /dev/null
+    [ ! -e "$IB_DIR/Makefile" -o -n "$SNAPSHOTS" ] && download > /dev/null
     (cd "$IB_DIR" && make package_list)
 }
 
 info() {
     # download imagebuilder if not existent or likely outdated
-    [ ! -e "$IB_DIR/Makefile" -o -n "$SNAPSHOTS" ] && download_ib > /dev/null
+    [ ! -e "$IB_DIR/Makefile" -o -n "$SNAPSHOTS" ] && download > /dev/null
     (cd "$IB_DIR" && make info)
 
 }
