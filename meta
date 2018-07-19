@@ -49,6 +49,9 @@ download() {
 	# LEDE Release Builder (17.01 "Reboot" Signing Key)
 	gpg --import $ROOT_DIR/keys/D52BBB6B.asc
 	echo 'B09BE781AE8A0CD4702FDCD3833C6010D52BBB6B:6:' | gpg --import-ownertrust
+	# OpenWrt Release Builder (18.06 Signing Key)
+	gpg --import $ROOT_DIR/keys/17E1CE16.asc
+	echo '6768C55E79B032D77A28DA5F0F20257417E1CE16:6:' | gpg --import-ownertrust
 
 	echo_blue "=== Verifying sha256sums signature"
 	gpg --verify sha256sums.asc
