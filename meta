@@ -125,8 +125,11 @@ info() {
 list() {
     # download imagebuilder if not existent or likely outdated
     [ ! -e "$IB_DIR/Makefile" -o -n "$SNAPSHOTS" ] && download > /dev/null
-    (cd "$IB_DIR" && make list)
-
+    (cd "$IB_DIR" &&
+    make list \
+        PROFILE="$PROFILE" \
+        PACKAGES="$PACKAGES" \
+    )
 }
 
 # check if required vars a given
