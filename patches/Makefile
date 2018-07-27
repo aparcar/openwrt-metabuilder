@@ -46,12 +46,12 @@ Building images:
 	make image BIN_DIR="<path>" # alternative output directory for the images
 	make image EXTRA_IMAGE_NAME="<string>" # Add this to the output image filename (sanitized)
 
-List packages:
+Print manifest:
 	List "all" packages which get installed into the image.
 	You can use the following parameters:
 
-	make list PROFILE="<profilename>" # override the default target profile
-	make list PACKAGES="<pkg1> [<pkg2> [<pkg3> ...]]" # include extra packages
+	make manifest PROFILE="<profilename>" # override the default target profile
+	make manifest PACKAGES="<pkg1> [<pkg2> [<pkg3> ...]]" # include extra packages
 
 endef
 $(eval $(call shexport,Helptext))
@@ -116,7 +116,7 @@ _call_image: staging_dir/host/.prereq-build
 	$(MAKE) -s build_image
 	$(MAKE) -s checksum
 
-_call_list: FORCE
+_call_manifest: FORCE
 	rm -rf $(TARGET_DIR)
 	mkdir -p $(TARGET_DIR) $(BIN_DIR) $(TMP_DIR) $(DL_DIR)
 	$(MAKE) package_reload >/dev/null 2>/dev/null
@@ -197,11 +197,11 @@ image:
 		$(if $(PACKAGES),USER_PACKAGES="$(PACKAGES)") \
 		$(if $(BIN_DIR),BIN_DIR="$(BIN_DIR)"))
 
-list: FORCE
+manifest: FORCE
 	$(MAKE) -s _check_profile
 	(unset PROFILE FILES PACKAGES MAKEFLAGS; \
 	$(MAKE) -s _call_list \
 		$(if $(PROFILE),USER_PROFILE="$(PROFILE_FILTER)") \
 		$(if $(PACKAGES),USER_PACKAGES="$(PACKAGES)"))
 
-.SILENT: help info image list
+.SILENT: help info image manifest

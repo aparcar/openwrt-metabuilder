@@ -5,8 +5,9 @@
 set -e
 
 ROOT_DIR="$PWD"                 # where the script is
-DISTRO="${DISTRO:-openwrt}"     # the folder where to store created files
-VERSION="${VERSION:-17.01.5}"   # default release
+DISTRO="${DISTRO:-LEDE}"        # the folder where to store created files
+VERSION="${VERSION:-17.01.5}"   # default version
+IB_VERSION="${IB_VERSION:-$VERSION}" # ImabeBuilder version if different to distro version
 BASE_URL="${BASE_URL:-https://downloads.openwrt.org}" # download imagebuilders
 BASE_PATH="$DISTRO/$VERSION/$TARGET/$SUBTARGET" # structure for storing stuff
 IB_DIR="$ROOT_DIR/imagebuilder/$BASE_PATH"      # where to store imagebuilders
@@ -14,11 +15,11 @@ BIN_DIR="${BIN_DIR:-$ROOT_DIR/bin/$BASE_PATH}"  # where to store created images
 IB="imagebuilder"   # search sha256sums for this string to find imagebuilder
 
 
-[ "$VERSION" != "snapshots" ] && [ -z "$SNAPSHOTS" ] && {
-    TARGETS_URL="$BASE_URL/releases/$VERSION/targets/$TARGET/$SUBTARGET"
+[ "$IB_VERSION" != "snapshots" ] && [ -z "$SNAPSHOTS" ] && {
+    TARGETS_URL="$BASE_URL/releases/$IB_VERSION/targets/$TARGET/$SUBTARGET"
 } || {
     TARGETS_URL="$BASE_URL/snapshots/targets/$TARGET/$SUBTARGET"
-    VERSION="snapshots"
+    IB_VERSION="snapshots"
     SNAPSHOTS=1
 }
 
@@ -26,6 +27,7 @@ echo_red()   { printf "\033[1;31m$*\033[m\n"; }
 echo_green() { printf "\033[1;32m$*\033[m\n"; }
 echo_blue()  { printf "\033[1;34m$*\033[m\n"; }
 
+# parse the sha256sums file to determine the ImageBuilder name
 get_ib_file() {
 	if [ -e "$IB_DIR/sha256sums" ] ; then
 		grep -- "$IB" "$IB_DIR/sha256sums" | awk '{print $2}' | sed 's/*//g'
@@ -34,11 +36,20 @@ get_ib_file() {
 	fi
 }
 
+# return the architecture of the ImageBuilder based on .config contents
+get_ib_arch() {
+    [ -d "$IB_DIR" ] && {
+        (cd "$IB_DIR" &&
+            grep CONFIG_TARGET_ARCH_PACKAGES .config | cut -d= -f2 | tr -d \"
+        )
+    } || echo "unknown"
+}
+
 download() {
 	mkdir -p "$IB_DIR"
 	cd "$IB_DIR"
 
-	echo_blue "=== download ImageBuilder"
+	echo_blue "download ImageBuilder"
 	wget "$TARGETS_URL/sha256sums" -O sha256sums
 	wget "$TARGETS_URL/sha256sums.gpg" -O sha256sums.asc
 
@@ -52,12 +63,12 @@ download() {
 	gpg --import $ROOT_DIR/keys/17E1CE16.asc
 	echo '6768C55E79B032D77A28DA5F0F20257417E1CE16:6:' | gpg --import-ownertrust
 
-	echo_blue "=== Verifying sha256sums signature"
+	echo_blue "Verifying sha256sums signature"
 	gpg --verify sha256sums.asc
-	echo_blue "=== Verified sha256sums signature."
+	echo_blue "Verified sha256sums signature."
 	if ! grep -- "$IB" sha256sums > sha256sums.small ; then
-		echo_red "=== Can not find $IB file in sha256sums."
-		echo_red "=== Is \$IB out of date?"
+		echo_red "Can not find $IB file in sha256sums."
+		echo_red "Is \$IB out of date?"
 		false
 	fi
 
@@ -65,28 +76,51 @@ download() {
 	if ! sha256sum -c ./sha256sums.small ; then
 		local ib_file
 		ib_file="$(get_ib_file)"
-		echo_blue "=== sha256 doesn't match or ImageBuilder file wasn't downloaded yet."
-		echo_blue "=== Downloading a fresh version"
+		echo_blue "sha256 doesn't match or ImageBuilder file wasn't downloaded yet."
+		echo_blue "Downloading a fresh version"
 		wget "$TARGETS_URL/$ib_file" -O "$ib_file"
         tar Jxf "$IB_DIR/$ib_file" --strip=1
-        # overwrite Makefile to have the package_list and list functions
-        cp "$ROOT_DIR/patches/Makefile" "$IB_DIR/"
+        # add Makefile which support package_list and  manifest 
+        # also modify Makefile based on DISTRO and VERSION
+        patch_ib
+        # if REPOS is defiend, add them
+        custom_repos
 	fi
 
 	# check again and fail here if the file is still bad
 	echo_blue "Checking sha256sum a second time"
 	if ! sha256sum -c ./sha256sums.small ; then
-		echo_red "=== ImageBuilder can not be verified!"
+		echo_red "ImageBuilder can not be verified!"
 		false
 	fi
 
+	echo_blue "ImageBuilder is up-to-date"
+
+}
+
+patch_ib() {
+    # overwrite Makefile to have the package_list and list functions
+    [ -d "$IB_DIR" ] && {
+        cp "$ROOT_DIR/patches/Makefile" "$IB_DIR/" &&
+        sed -i \
+            -e "s/CONFIG_VERSION_DIST=.*/CONFIG_VERSION_DIST=\"$DISTRO\"/" \
+            -e "s/CONFIG_VERSION_NUMBER=.*/CONFIG_VERSION_NUMBER=\"$VERSION\"/" \
+            "$IB_DIR/.config"
+    } || die "Missing ImageBuilder: $IB_DIR"
+}
+
+custom_repos() {
     # ability to add custom repositories
-    [ -n "$REPO_FILE" ] && [ -f "$REPO_FILE" ] && {
-        cp "$REPO_FILE" "$IB_DIR/repositories.conf"
+    [ -n "$REPOS" ] && {
+        echo "$REPOS" > "$IB_DIR/repositories.conf"
+        sed -i \
+            -e "s/{{ pkg_arch }}/$(get_ib_arch)/" \
+            -e "s/{{ target }}/$TARGET/" \
+            -e "s/{{ subtarget }}/$SUBTARGET/" \
+            -e "s/{{ ib_version }}/${IB_VERSION:-$VERSION}/" \
+            -e "s/{{ version }}/$VERSION/" \
+            "$IB_DIR/repositories.conf"
     }
-
-	echo_blue "=== ImageBuilder is up-to-date"
-
 }
 
 die() {
