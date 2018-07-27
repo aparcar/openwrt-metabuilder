@@ -127,46 +127,19 @@ die() {
     exit 1
 }
 
-image() {
-    [ -n "$PROFILE" ] || die "missing \$PROFILE"
-    # download imagebuilder if not existent or likely outdated
-    [ ! -e "$IB_DIR/Makefile" -o -n "$SNAPSHOTS" ] && download
-
-    # run `make image` and pass variables
-    (cd "$IB_DIR" &&
-    make image \
-        PROFILE="$PROFILE" \
-        PACKAGES="$PACKAGES" \
-        BIN_DIR="$BIN_DIR" \
-        EXTRA_IMAGE_NAME="$EXTRA_IMAGE_NAME"
-    )
-}
-
-package_list() {
-    # download imagebuilder if not existent or likely outdated
-    [ ! -e "$IB_DIR/Makefile" -o -n "$SNAPSHOTS" ] && download > /dev/null
-    (cd "$IB_DIR" && make package_list)
-}
-
-info() {
-    # download imagebuilder if not existent or likely outdated
-    [ ! -e "$IB_DIR/Makefile" -o -n "$SNAPSHOTS" ] && download > /dev/null
-    (cd "$IB_DIR" && make info)
-
-}
-
-list() {
-    # download imagebuilder if not existent or likely outdated
-    [ ! -e "$IB_DIR/Makefile" -o -n "$SNAPSHOTS" ] && download > /dev/null
-    (cd "$IB_DIR" &&
-    make list \
-        PROFILE="$PROFILE" \
-        PACKAGES="$PACKAGES" \
-    )
-}
-
 # check if required vars a given
-[ -n "$TARGET" ] || die "missing $\$TARGET"
-[ -n "$SUBTARGET" ] || die "missing $\$SUBTARGET"
+[ -n "$TARGET" ] || die "missing \$TARGET"
+[ -n "$SUBTARGET" ] || die "missing \$SUBTARGET"
+[ -n "$PROFILE" -a "$1" == "image" ] || die "missing \$PROFILE"
 
-$@
+# download imagebuilder if not existent or likely outdated
+[ ! -e "$IB_DIR/Makefile" -o -n "$SNAPSHOTS" ] && download
+
+# run `make image` and pass variables
+(cd "$IB_DIR" &&
+make "$1" \
+    PROFILE="$PROFILE" \
+    PACKAGES="$PACKAGES" \
+    BIN_DIR="$BIN_DIR" \
+    EXTRA_IMAGE_NAME="$EXTRA_IMAGE_NAME"
+)

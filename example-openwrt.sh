@@ -1,3 +1,4 @@
+export DISTRO="OpenWrt"
 export VERSION="18.06.0-rc2"
 export TARGET="ar71xx"
 export SUBTARGET="generic"
