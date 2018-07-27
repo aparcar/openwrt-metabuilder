@@ -15,11 +15,10 @@ BIN_DIR="${BIN_DIR:-$ROOT_DIR/bin/$BASE_PATH}"  # where to store created images
 IB="imagebuilder"   # search sha256sums for this string to find imagebuilder
 
 
-[ "$IB_VERSION" != "snapshots" ] && [ -z "$SNAPSHOTS" ] && {
+[ "$IB_VERSION" != "snapshots" ] && {
     TARGETS_URL="$BASE_URL/releases/$IB_VERSION/targets/$TARGET/$SUBTARGET"
 } || {
     TARGETS_URL="$BASE_URL/snapshots/targets/$TARGET/$SUBTARGET"
-    IB_VERSION="snapshots"
     SNAPSHOTS=1
 }
 

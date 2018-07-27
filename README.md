@@ -12,8 +12,6 @@ Build `ar71xx/generic/tl-wr710n-v2.1` with latest (17.01.4) release:
 
 Build latest snapshot of the same target/profile combo (both work):
 
-    PROFILE="tl-wr710n-v2.1" SNAPSHOTS=1 TARGET="ar71xx" SUBTARGET="generic" ./meta
-    or
     PROFILE="tl-wr710n-v2.1" RELEASE=snapshots TARGET="ar71xx" SUBTARGET="generic" ./meta
 
 ### Custom repositories
