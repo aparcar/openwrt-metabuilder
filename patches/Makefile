@@ -200,7 +200,7 @@ image:
 manifest: FORCE
 	$(MAKE) -s _check_profile
 	(unset PROFILE FILES PACKAGES MAKEFLAGS; \
-	$(MAKE) -s _call_list \
+	$(MAKE) -s _call_manifest \
 		$(if $(PROFILE),USER_PROFILE="$(PROFILE_FILTER)") \
 		$(if $(PACKAGES),USER_PACKAGES="$(PACKAGES)"))
 
