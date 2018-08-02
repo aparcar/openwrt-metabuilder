@@ -130,7 +130,6 @@ die() {
 # check if required vars a given
 [ -n "$TARGET" ] || die "missing \$TARGET"
 [ -n "$SUBTARGET" ] || die "missing \$SUBTARGET"
-[ -n "$PROFILE" -a "$1" == "image" ] || die "missing \$PROFILE"
 
 # download imagebuilder if not existent or likely outdated
 [ ! -e "$IB_DIR/Makefile" -o -n "$SNAPSHOTS" ] && download
