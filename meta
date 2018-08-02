@@ -5,8 +5,8 @@
 set -e
 
 ROOT_DIR="$PWD"                 # where the script is
-DISTRO="${DISTRO:-LEDE}"        # the folder where to store created files
-VERSION="${VERSION:-17.01.5}"   # default version
+DISTRO="${DISTRO:-OpenWrt}"        # the folder where to store created files
+VERSION="${VERSION:-18.06.0}"   # default version
 IB_VERSION="${IB_VERSION:-$VERSION}" # ImabeBuilder version if different to distro version
 BASE_URL="${BASE_URL:-https://downloads.openwrt.org}" # download imagebuilders
 BASE_PATH="$DISTRO/$VERSION/$TARGET/$SUBTARGET" # structure for storing stuff
