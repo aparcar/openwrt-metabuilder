@@ -135,6 +135,9 @@ die() {
 # download imagebuilder if not existent or likely outdated
 [ ! -e "$IB_DIR/Makefile" -o -n "$SNAPSHOTS" ] && download
 
+# if action is download quit here as it's done above
+[ "$1" = "download" ] && exit 0
+
 # run `make image` and pass variables
 (cd "$IB_DIR" &&
 make "$1" \
