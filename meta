@@ -132,7 +132,7 @@ die() {
 [ -n "$SUBTARGET" ] || die "missing \$SUBTARGET"
 
 # download imagebuilder if not existent or likely outdated
-[ ! -e "$IB_DIR/Makefile" -o -n "$SNAPSHOTS" ] && download
+[ ! -e "$IB_DIR/Makefile" -o -n "$SNAPSHOTS" ] && download 1>&2
 
 # if action is download quit here as it's done above
 [ "$1" = "download" ] && exit 0
@@ -143,5 +143,6 @@ make "$1" \
     PROFILE="$PROFILE" \
     PACKAGES="$PACKAGES" \
     BIN_DIR="$BIN_DIR" \
-    EXTRA_IMAGE_NAME="$EXTRA_IMAGE_NAME"
+    EXTRA_IMAGE_NAME="$EXTRA_IMAGE_NAME" \
+    FILES="$FILES"
 )
