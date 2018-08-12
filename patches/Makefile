@@ -121,7 +121,7 @@ _call_manifest: FORCE
 	mkdir -p $(TARGET_DIR) $(BIN_DIR) $(TMP_DIR) $(DL_DIR)
 	$(MAKE) package_reload >/dev/null
 	$(MAKE) package_install >/dev/null
-	$(OPKG) list-installe
+	$(OPKG) list-installed
 
 package_index: FORCE
 	@echo >&2
