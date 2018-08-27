@@ -6,7 +6,7 @@ set -e
 
 ROOT_DIR="$PWD"                 # where the script is
 DISTRO="${DISTRO:-OpenWrt}"        # the folder where to store created files
-VERSION="${VERSION:-18.06.0}"   # default version
+VERSION="${VERSION:-18.06.1}"   # default version
 IB_VERSION="${IB_VERSION:-$VERSION}" # ImabeBuilder version if different to distro version
 BASE_URL="${BASE_URL:-https://downloads.openwrt.org}" # download imagebuilders
 BASE_PATH="$DISTRO/$VERSION/$TARGET/$SUBTARGET" # structure for storing stuff
@@ -19,12 +19,7 @@ IB="imagebuilder"   # search sha256sums for this string to find imagebuilder
     TARGETS_URL="$BASE_URL/releases/$IB_VERSION/targets/$TARGET/$SUBTARGET"
 } || {
     TARGETS_URL="$BASE_URL/snapshots/targets/$TARGET/$SUBTARGET"
-    SNAPSHOTS=1
 }
-
-echo_red()   { printf "\033[1;31m$*\033[m\n"; }
-echo_green() { printf "\033[1;32m$*\033[m\n"; }
-echo_blue()  { printf "\033[1;34m$*\033[m\n"; }
 
 # parse the sha256sums file to determine the ImageBuilder name
 get_ib_file() {
@@ -44,14 +39,7 @@ get_ib_arch() {
     } || echo "unknown"
 }
 
-download() {
-	mkdir -p "$IB_DIR"
-	cd "$IB_DIR"
-
-	echo_blue "download ImageBuilder"
-	wget "$TARGETS_URL/sha256sums" -O sha256sums
-	wget "$TARGETS_URL/sha256sums.gpg" -O sha256sums.asc
-
+meta_setup() {
 	# LEDE Build System (LEDE GnuPG key for unattended build jobs)
 	gpg --import "$ROOT_DIR/keys/626471F1.asc"
 	echo '54CC74307A2C6DC9CE618269CD84BCED626471F1:6:' | gpg --import-ownertrust
@@ -62,12 +50,22 @@ download() {
 	gpg --import $ROOT_DIR/keys/17E1CE16.asc
 	echo '6768C55E79B032D77A28DA5F0F20257417E1CE16:6:' | gpg --import-ownertrust
 
-	echo_blue "Verifying sha256sums signature"
+    touch "$ROOT_DIR/.meta_setup"
+}
+
+download() {
+	mkdir -p "$IB_DIR"
+	cd "$IB_DIR"
+
+	echo "download checksums and signature"
+	wget "$TARGETS_URL/sha256sums" -O sha256sums
+	wget "$TARGETS_URL/sha256sums.gpg" -O sha256sums.asc
+
+	echo "verifying sha256sums signature"
 	gpg --verify sha256sums.asc
-	echo_blue "Verified sha256sums signature."
+	echo "verified sha256sums signature."
 	if ! grep -- "$IB" sha256sums > sha256sums.small ; then
-		echo_red "Can not find $IB file in sha256sums."
-		echo_red "Is \$IB out of date?"
+		echo "can not find $IB file in sha256sums. Is \$IB out of date?"
 		false
 	fi
 
@@ -75,26 +73,25 @@ download() {
 	if ! sha256sum -c ./sha256sums.small ; then
 		local ib_file
 		ib_file="$(get_ib_file)"
-		echo_blue "sha256 doesn't match or ImageBuilder file wasn't downloaded yet."
-		echo_blue "Downloading a fresh version"
+		echo "sha256 doesn't match or ImageBuilder file wasn't downloaded yet."
+		echo "download ImageBuilder"
 		wget "$TARGETS_URL/$ib_file" -O "$ib_file"
         tar Jxf "$IB_DIR/$ib_file" --strip=1
         # add Makefile which support package_list and  manifest 
         # also modify Makefile based on DISTRO and VERSION
         patch_ib
         # if REPOS is defiend, add them
-        custom_repos
+        [ -n "$REPOS" ] && custom_repos
 	fi
 
 	# check again and fail here if the file is still bad
-	echo_blue "Checking sha256sum a second time"
+	echo "Checking sha256sum a second time"
 	if ! sha256sum -c ./sha256sums.small ; then
-		echo_red "ImageBuilder can not be verified!"
+		echo "ImageBuilder can not be verified!"
 		false
 	fi
 
-	echo_blue "ImageBuilder is up-to-date"
-
+	echo "ImageBuilder is up-to-date"
 }
 
 patch_ib() {
@@ -110,32 +107,30 @@ patch_ib() {
 
 custom_repos() {
     # ability to add custom repositories
-    [ -n "$REPOS" ] && {
-        echo "$REPOS" > "$IB_DIR/repositories.conf"
-        sed -i \
-            -e "s/{{ pkg_arch }}/$(get_ib_arch)/" \
-            -e "s/{{ target }}/$TARGET/" \
-            -e "s/{{ subtarget }}/$SUBTARGET/" \
-            -e "s/{{ ib_version }}/${IB_VERSION:-$VERSION}/" \
-            -e "s/{{ version }}/$VERSION/" \
-            "$IB_DIR/repositories.conf"
-    }
+    echo "$REPOS" > "$IB_DIR/repositories.conf"
+    sed -i \
+        -e "s/{{ pkg_arch }}/$(get_ib_arch)/" \
+        -e "s/{{ target }}/$TARGET/" \
+        -e "s/{{ subtarget }}/$SUBTARGET/" \
+        -e "s/{{ ib_version }}/${IB_VERSION:-$VERSION}/" \
+        -e "s/{{ version }}/$VERSION/" \
+        "$IB_DIR/repositories.conf"
 }
 
 die() {
-    echo_red $1
+    echo $1
     exit 1
 }
+
+# setup this meta script if not already done
+[ ! -d "$ROOT_DIR/.meta_setup" ] && meta_setup
 
 # check if required vars a given
 [ -n "$TARGET" ] || die "missing \$TARGET"
 [ -n "$SUBTARGET" ] || die "missing \$SUBTARGET"
 
-# download imagebuilder if not existent or likely outdated
-[ ! -e "$IB_DIR/Makefile" -o -n "$SNAPSHOTS" ] && download 1>&2
-
-# if action is download quit here as it's done above
-[ "$1" = "download" ] && exit 0
+# always check if local state is up to date
+download 1>&2
 
 # run `make image` and pass variables
 (cd "$IB_DIR" &&
