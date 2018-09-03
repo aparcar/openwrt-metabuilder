@@ -65,8 +65,7 @@ download() {
 	gpg --verify sha256sums.asc
 	echo "verified sha256sums signature."
 	if ! grep -- "$IB" sha256sums > sha256sums.small ; then
-		echo "can not find $IB file in sha256sums. Is \$IB out of date?"
-		false
+		die "can not find $IB file in sha256sums. Is \$IB out of date?"
 	fi
 
 	# if missing, outdated or invalid, download again
@@ -87,8 +86,7 @@ download() {
 	# check again and fail here if the file is still bad
 	echo "Checking sha256sum a second time"
 	if ! sha256sum -c ./sha256sums.small ; then
-		echo "ImageBuilder can not be verified!"
-		false
+		die "ImageBuilder can not be verified!"
 	fi
 
 	echo "ImageBuilder is up-to-date"
@@ -129,8 +127,11 @@ die() {
 [ -n "$TARGET" ] || die "missing \$TARGET"
 [ -n "$SUBTARGET" ] || die "missing \$SUBTARGET"
 
-# always check if local state is up to date
-download 1>&2
+# check if local state is up to date
+[ -z "$NO_DOWNLOAD" ] || download 1>&2
+
+# will stop here if command is download
+[ "$1" != "download" ] || exit 0
 
 # run `make image` and pass variables
 (cd "$IB_DIR" &&
