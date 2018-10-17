@@ -4,21 +4,20 @@
 
 set -e
 
-ROOT_DIR="$PWD"                 # where the script is
-DISTRO="${DISTRO:-OpenWrt}"        # the folder where to store created files
+ROOT_DIR="$PWD"			# where the script is
+DISTRO="${DISTRO:-OpenWrt}"	# the folder where to store created files
 VERSION="${VERSION:-18.06.1}"   # default version
 IB_VERSION="${IB_VERSION:-$VERSION}" # ImabeBuilder version if different to distro version
-BASE_URL="${BASE_URL:-https://downloads.openwrt.org}" # download imagebuilders
-BASE_PATH="$DISTRO/$VERSION/$TARGET/$SUBTARGET" # structure for storing stuff
-IB_DIR="$ROOT_DIR/imagebuilder/$BASE_PATH"      # where to store imagebuilders
+BASE_URL="${BASE_URL:-https://downloads.openwrt.org}" 	# download imagebuilders
+BASE_PATH="$DISTRO/$VERSION/$TARGET/$SUBTARGET" 	# structure for storing stuff
+IB_DIR="$ROOT_DIR/imagebuilder/$BASE_PATH"	  	# where to store imagebuilders
 BIN_DIR="${BIN_DIR:-$ROOT_DIR/bin/$BASE_PATH}"  # where to store created images
 IB="imagebuilder"   # search sha256sums for this string to find imagebuilder
 
-
 [ "$IB_VERSION" != "snapshots" ] && {
-    TARGETS_URL="$BASE_URL/releases/$IB_VERSION/targets/$TARGET/$SUBTARGET"
+	TARGETS_URL="$BASE_URL/releases/$IB_VERSION/targets/$TARGET/$SUBTARGET"
 } || {
-    TARGETS_URL="$BASE_URL/snapshots/targets/$TARGET/$SUBTARGET"
+	TARGETS_URL="$BASE_URL/snapshots/targets/$TARGET/$SUBTARGET"
 }
 
 # parse the sha256sums file to determine the ImageBuilder name
@@ -32,11 +31,11 @@ get_ib_file() {
 
 # return the architecture of the ImageBuilder based on .config contents
 get_ib_arch() {
-    [ -d "$IB_DIR" ] && {
-        (cd "$IB_DIR" &&
-            grep CONFIG_TARGET_ARCH_PACKAGES .config | cut -d= -f2 | tr -d \"
-        )
-    } || echo "unknown"
+	[ -d "$IB_DIR" ] && {
+		(cd "$IB_DIR" &&
+			grep CONFIG_TARGET_ARCH_PACKAGES .config | cut -d= -f2 | tr -d \"
+		)
+	} || echo "unknown"
 }
 
 meta_setup() {
@@ -50,7 +49,7 @@ meta_setup() {
 	gpg --import $ROOT_DIR/keys/17E1CE16.asc
 	echo '6768C55E79B032D77A28DA5F0F20257417E1CE16:6:' | gpg --import-ownertrust
 
-    touch "$ROOT_DIR/.meta_setup"
+	touch "$ROOT_DIR/.meta_setup"
 }
 
 download() {
@@ -75,12 +74,12 @@ download() {
 		echo "sha256 doesn't match or ImageBuilder file wasn't downloaded yet."
 		echo "download ImageBuilder"
 		wget "$TARGETS_URL/$ib_file" -O "$ib_file"
-        tar Jxf "$IB_DIR/$ib_file" --strip=1 --overwrite
-        # add Makefile which support package_list and  manifest 
-        # also modify Makefile based on DISTRO and VERSION
-        patch_ib
-        # if REPOS is defiend, add them
-        [ -n "$REPOS" ] && custom_repos
+		tar Jxf "$IB_DIR/$ib_file" --strip=1 --overwrite
+		# add Makefile which support package_list and  manifest 
+		# also modify Makefile based on DISTRO and VERSION
+		patch_ib
+		# if REPOS is defiend, add them
+		[ -n "$REPOS" ] && custom_repos
 	fi
 
 	# check again and fail here if the file is still bad
@@ -93,31 +92,31 @@ download() {
 }
 
 patch_ib() {
-    # overwrite Makefile to have the package_list and list functions
-    [ -d "$IB_DIR" ] && {
-        cp "$ROOT_DIR/patches/Makefile" "$IB_DIR/" &&
-        sed -i \
-            -e "s/CONFIG_VERSION_DIST=.*/CONFIG_VERSION_DIST=\"$DISTRO\"/" \
-            -e "s/CONFIG_VERSION_NUMBER=.*/CONFIG_VERSION_NUMBER=\"$VERSION\"/" \
-            "$IB_DIR/.config"
-    } || die "Missing ImageBuilder: $IB_DIR"
+	# overwrite Makefile to have the package_list and list functions
+	[ -d "$IB_DIR" ] && {
+		cp "$ROOT_DIR/patches/Makefile" "$IB_DIR/" &&
+		sed -i \
+			-e "s/CONFIG_VERSION_DIST=.*/CONFIG_VERSION_DIST=\"$DISTRO\"/" \
+			-e "s/CONFIG_VERSION_NUMBER=.*/CONFIG_VERSION_NUMBER=\"$VERSION\"/" \
+			"$IB_DIR/.config"
+	} || die "Missing ImageBuilder: $IB_DIR"
 }
 
 custom_repos() {
-    # ability to add custom repositories
-    echo "$REPOS" > "$IB_DIR/repositories.conf"
-    sed -i \
-        -e "s/{{ pkg_arch }}/$(get_ib_arch)/" \
-        -e "s/{{ target }}/$TARGET/" \
-        -e "s/{{ subtarget }}/$SUBTARGET/" \
-        -e "s/{{ ib_version }}/${IB_VERSION:-$VERSION}/" \
-        -e "s/{{ version }}/$VERSION/" \
-        "$IB_DIR/repositories.conf"
+	# ability to add custom repositories
+	echo "$REPOS" > "$IB_DIR/repositories.conf"
+	sed -i \
+		-e "s/{{ pkg_arch }}/$(get_ib_arch)/" \
+		-e "s/{{ target }}/$TARGET/" \
+		-e "s/{{ subtarget }}/$SUBTARGET/" \
+		-e "s/{{ ib_version }}/${IB_VERSION:-$VERSION}/" \
+		-e "s/{{ version }}/$VERSION/" \
+		"$IB_DIR/repositories.conf"
 }
 
 die() {
-    echo $1
-    exit 1
+	echo $1
+	exit 1
 }
 
 # setup this meta script if not already done
@@ -136,9 +135,9 @@ die() {
 # run `make image` and pass variables
 (cd "$IB_DIR" &&
 make "$1" \
-    PROFILE="$PROFILE" \
-    PACKAGES="$PACKAGES" \
-    BIN_DIR="$BIN_DIR" \
-    EXTRA_IMAGE_NAME="$EXTRA_IMAGE_NAME" \
-    FILES="$FILES"
+	PROFILE="$PROFILE" \
+	PACKAGES="$PACKAGES" \
+	BIN_DIR="$BIN_DIR" \
+	EXTRA_IMAGE_NAME="$EXTRA_IMAGE_NAME" \
+	FILES="$FILES"
 )
