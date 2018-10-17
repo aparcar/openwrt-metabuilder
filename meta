@@ -75,7 +75,7 @@ download() {
 		echo "sha256 doesn't match or ImageBuilder file wasn't downloaded yet."
 		echo "download ImageBuilder"
 		wget "$TARGETS_URL/$ib_file" -O "$ib_file"
-        tar Jxf "$IB_DIR/$ib_file" --strip=1
+        tar Jxf "$IB_DIR/$ib_file" --strip=1 --overwrite
         # add Makefile which support package_list and  manifest 
         # also modify Makefile based on DISTRO and VERSION
         patch_ib
