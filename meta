@@ -75,19 +75,20 @@ download() {
 		echo "download ImageBuilder"
 		wget "$TARGETS_URL/$ib_file" -O "$ib_file"
 		tar Jxf "$IB_DIR/$ib_file" --strip=1 --overwrite
-		[ -n "$KEEP_IB_TAR" ] || rm -rf "$IB_DIR/$ib_file"
 		# add Makefile which support package_list and  manifest 
 		# also modify Makefile based on DISTRO and VERSION
 		patch_ib
 		# if REPOS is defiend, add them
 		[ -n "$REPOS" ] && custom_repos
+
+		# check again and fail here if the file is still bad
+		echo "Checking sha256sum a second time"
+		if ! sha256sum -c ./sha256sums.small ; then
+			die "ImageBuilder can not be verified!"
+		fi
 	fi
 
-	# check again and fail here if the file is still bad
-	echo "Checking sha256sum a second time"
-	if ! sha256sum -c ./sha256sums.small ; then
-		die "ImageBuilder can not be verified!"
-	fi
+	[ -n "$KEEP_IB_TAR" ] || rm -rf "$IB_DIR/$ib_file"
 
 	echo "ImageBuilder is up-to-date"
 }
@@ -128,7 +129,7 @@ die() {
 [ -n "$SUBTARGET" ] || die "missing \$SUBTARGET"
 
 # check if local state is up to date
-[ -z "$NO_DOWNLOAD" ] || download 1>&2
+[ -n "$NO_DOWNLOAD" ] || download 1>&2
 
 # will stop here if command is download
 [ "$1" != "download" ] || exit 0
