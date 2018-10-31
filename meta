@@ -67,8 +67,9 @@ download() {
 		die "can not find $IB file in sha256sums. Is \$IB out of date?"
 	fi
 
+	touch sha256sums.current
 	# if missing, outdated or invalid, download again
-	if ! sha256sum -c ./sha256sums.small ; then
+	if "$(cat sha256sums.small)" != "$(cat sha256sums.current)"; then
 		local ib_file
 		ib_file="$(get_ib_file)"
 		echo "sha256 doesn't match or ImageBuilder file wasn't downloaded yet."
@@ -86,9 +87,9 @@ download() {
 		if ! sha256sum -c ./sha256sums.small ; then
 			die "ImageBuilder can not be verified!"
 		fi
+		mv sha256sums.small sha256sums.current
+		[ -n "$KEEP_IB_TAR" ] || rm -rf "$IB_DIR/$ib_file"
 	fi
-
-	[ -n "$KEEP_IB_TAR" ] || rm -rf "$IB_DIR/$ib_file"
 
 	echo "ImageBuilder is up-to-date"
 }
