@@ -69,7 +69,7 @@ download() {
 
 	touch sha256sums.current
 	# if missing, outdated or invalid, download again
-	if "$(cat sha256sums.small)" != "$(cat sha256sums.current)"; then
+	if [ "$(cat sha256sums.small)" != "$(cat sha256sums.current)" ] ; then
 		local ib_file
 		ib_file="$(get_ib_file)"
 		echo "sha256 doesn't match or ImageBuilder file wasn't downloaded yet."
