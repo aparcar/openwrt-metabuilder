@@ -21,7 +21,7 @@ IB="imagebuilder"   # search sha256sums for this string to find imagebuilder
 }
 
 # parse the sha256sums file to determine the ImageBuilder name
-get_ib_file() {
+get_ib_archive_name() {
 	if [ -e "$IB_DIR/sha256sums" ] ; then
 		grep -- "$IB" "$IB_DIR/sha256sums" | awk '{print $2}' | sed 's/*//g'
 	else
@@ -70,12 +70,14 @@ download() {
 	touch sha256sums.current
 	# if missing, outdated or invalid, download again
 	if [ "$(cat sha256sums.small)" != "$(cat sha256sums.current)" ] ; then
-		local ib_file
-		ib_file="$(get_ib_file)"
+		local ib_archive_name
+		ib_archive_name="$(get_ib_archive_name)"
 		echo "sha256 doesn't match or ImageBuilder file wasn't downloaded yet."
+		echo "remove outdated ImageBuilder files"
+		find . ! -name 'sha256sums.*' -type f -exec rm -f {} +
 		echo "download ImageBuilder"
-		wget "$TARGETS_URL/$ib_file" -O "$ib_file"
-		tar Jxf "$IB_DIR/$ib_file" --strip=1 --overwrite
+		wget "$TARGETS_URL/$ib_archive_name" -O "$ib_archive_name"
+		tar Jxf "$IB_DIR/$ib_archive_name" --strip=1 --overwrite
 		# add Makefile which support package_list and  manifest 
 		# also modify Makefile based on DISTRO and VERSION
 		patch_ib
@@ -88,7 +90,7 @@ download() {
 			die "ImageBuilder can not be verified!"
 		fi
 		mv sha256sums.small sha256sums.current
-		[ -n "$KEEP_IB_TAR" ] || rm -rf "$IB_DIR/$ib_file"
+		[ -n "$KEEP_IB_TAR" ] || rm -rf "$IB_DIR/$ib_archive_name"
 	fi
 
 	echo "ImageBuilder is up-to-date"
