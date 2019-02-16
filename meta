@@ -23,7 +23,7 @@ IB="imagebuilder"   # search sha256sums for this string to find imagebuilder
 # parse the sha256sums file to determine the ImageBuilder name
 get_ib_archive_name() {
 	if [ -e "$IB_DIR/sha256sums" ] ; then
-		grep -- "$IB" "$IB_DIR/sha256sums" | awk '{print $2}' | sed -e 's/*//g'
+		grep -- "$IB" "$IB_DIR/sha256sums" | awk '{print $2}' | sed -e "s/*//g"
 	else
 		false
 	fi
