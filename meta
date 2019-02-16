@@ -112,7 +112,7 @@ custom_repos() {
 	echo "$REPOS" > "$IB_DIR/repositories.conf"
 	sed -i \
 		-e "s/{{ pkg_arch }}/$(get_ib_arch)/" \
-		-e "s/{{ target }}/$TARGET/" \
+		-e "s#{{ target }}#$TARGET#" \
 		-e "s/{{ ib_version }}/${IB_VERSION:-$VERSION}/" \
 		-e "s/{{ version }}/$VERSION/" \
 		"$IB_DIR/repositories.conf"
