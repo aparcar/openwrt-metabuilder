@@ -13,6 +13,7 @@ BASE_PATH="$DISTRO/$VERSION/$TARGET" 	        # structure for storing stuff
 IB_DIR="$ROOT_DIR/imagebuilder/$BASE_PATH"	  	# where to store imagebuilders
 BIN_DIR="${BIN_DIR:-$ROOT_DIR/bin/$BASE_PATH}"  # where to store created images
 IB="imagebuilder"   # search sha256sums for this string to find imagebuilder
+BUILD_KEY="${BUILD_KEY:-$ROOT_DIR/key-build}"
 
 [ "$IB_VERSION" != "snapshots" ] && {
 	TARGETS_URL="$BASE_URL/releases/$IB_VERSION/targets/$TARGET"
@@ -78,7 +79,7 @@ download() {
 		echo "download ImageBuilder"
 		wget "$TARGETS_URL/$ib_archive_name" -O "$ib_archive_name"
 		tar Jxf "$IB_DIR/$ib_archive_name" --strip=1 --overwrite
-		# add Makefile which support package_list and  manifest 
+		# add Makefile which support package_list and  manifest
 		# also modify Makefile based on DISTRO and VERSION
 		patch_ib
 		# if REPOS is defiend, add them
@@ -92,6 +93,10 @@ download() {
 		mv sha256sums.small sha256sums.current
 		[ -n "$KEEP_IB_TAR" ] || rm -rf "$IB_DIR/$ib_archive_name"
 	fi
+
+	# copy BUILD_KEY to imagebuilder folder to sign images
+	[ -e "$BUILD_KEY" ] && ln -s "$BUILD_KEY" "$IB_DIR/key-build"
+	[ -e "$BUILD_KEY.ucert" ] && ln -s "$BUILD_KEY.ucert" "$IB_DIR/key-build.ucert"
 
 	echo "ImageBuilder is up-to-date"
 }
