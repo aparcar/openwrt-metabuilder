@@ -95,8 +95,8 @@ download() {
 	fi
 
 	# copy BUILD_KEY to imagebuilder folder to sign images
-	[ -e "$BUILD_KEY" ] && ln -s "$BUILD_KEY" "$IB_DIR/key-build"
-	[ -e "$BUILD_KEY.ucert" ] && ln -s "$BUILD_KEY.ucert" "$IB_DIR/key-build.ucert"
+	[ -e "$BUILD_KEY" ] && ln -sf "$BUILD_KEY" "$IB_DIR/key-build"
+	[ -e "$BUILD_KEY.ucert" ] && ln -sf "$BUILD_KEY.ucert" "$IB_DIR/key-build.ucert"
 
 	echo "ImageBuilder is up-to-date"
 }
