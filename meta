@@ -5,8 +5,8 @@
 set -e
 
 ROOT_DIR="$PWD"			# where the script is
-DISTRO="${DISTRO:-OpenWrt}"	# the folder where to store created files
-VERSION="${VERSION:-18.06.1}"   # default version
+DISTRO="${DISTRO:-openwrt}"	# the folder where to store created files
+VERSION="${VERSION:-18.06.2}"   # default version
 IB_VERSION="${IB_VERSION:-$VERSION}" # ImabeBuilder version if different to distro version
 BASE_URL="${BASE_URL:-https://downloads.openwrt.org}" 	# download imagebuilders
 BASE_PATH="$DISTRO/$VERSION/$TARGET" 	        # structure for storing stuff
@@ -81,7 +81,6 @@ download() {
 		tar Jxf "$IB_DIR/$ib_archive_name" --strip=1 --overwrite
 		# add Makefile which support package_list and  manifest
 		# also modify Makefile based on DISTRO and VERSION
-		patch_ib
 		# if REPOS is defiend, add them
 		[ -n "$REPOS" ] && custom_repos
 
@@ -99,17 +98,6 @@ download() {
 	[ -e "$BUILD_KEY.ucert" ] && ln -sf "$BUILD_KEY.ucert" "$IB_DIR/key-build.ucert"
 
 	echo "ImageBuilder is up-to-date"
-}
-
-patch_ib() {
-	# overwrite Makefile to have the package_list and list functions
-	[ -d "$IB_DIR" ] && {
-		cp "$ROOT_DIR/patches/Makefile" "$IB_DIR/" &&
-		sed -i \
-			-e "s/CONFIG_VERSION_DIST=.*/CONFIG_VERSION_DIST=\"$DISTRO\"/" \
-			-e "s/CONFIG_VERSION_NUMBER=.*/CONFIG_VERSION_NUMBER=\"$VERSION\"/" \
-			"$IB_DIR/.config"
-	} || die "Missing ImageBuilder: $IB_DIR"
 }
 
 custom_repos() {

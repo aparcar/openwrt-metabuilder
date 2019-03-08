@@ -1,7 +1,7 @@
-export DISTRO="OpenWrt"
+export DISTRO="openwrt"
 export VERSION="snapshots"
-export TARGET="ar71xx/generic"
-export PROFILE="tl-wdr4300-v1"
+export TARGET="ath79/generic"
+export PROFILE="tl-wdr4300"
 export PACKAGES="tmux htop"
 
 ./meta image
