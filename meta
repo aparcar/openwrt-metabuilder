@@ -15,7 +15,7 @@ BIN_DIR="${BIN_DIR:-$ROOT_DIR/bin/$BASE_PATH}"  # where to store created images
 IB="imagebuilder"   # search sha256sums for this string to find imagebuilder
 BUILD_KEY="${BUILD_KEY:-$ROOT_DIR/key-build}"
 
-[ "$IB_VERSION" != "snapshots" ] && {
+[ "$IB_VERSION" != "snapshot" ] && {
 	TARGETS_URL="$BASE_URL/releases/$IB_VERSION/targets/$TARGET"
 } || {
 	TARGETS_URL="$BASE_URL/snapshots/targets/$TARGET"
