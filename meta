@@ -7,7 +7,7 @@ set -e
 ROOT_DIR="$PWD"			# where the script is
 DISTRO="${DISTRO:-openwrt}"	# the folder where to store created files
 VERSION="${VERSION:-18.06.2}"   # default version
-IB_VERSION="${IB_VERSION:-$VERSION}" # ImabeBuilder version if different to distro version
+IB_VERSION="${IB_VERSION:-$VERSION}" # ImageBuilder version if different to distro version
 BASE_URL="${BASE_URL:-https://downloads.openwrt.org}" 	# download imagebuilders
 BASE_PATH="$DISTRO/$VERSION/$TARGET" 	        # structure for storing stuff
 IB_DIR="$ROOT_DIR/imagebuilder/$BASE_PATH"	  	# where to store imagebuilders
@@ -15,7 +15,7 @@ BIN_DIR="${BIN_DIR:-$ROOT_DIR/bin/$BASE_PATH}"  # where to store created images
 IB="imagebuilder"   # search sha256sums for this string to find imagebuilder
 BUILD_KEY="${BUILD_KEY:-$ROOT_DIR/key-build}"
 
-[ "$IB_VERSION" != "snapshot" ] && {
+[ "$IB_VERSION" != "snapshots" ] && {
 	TARGETS_URL="$BASE_URL/releases/$IB_VERSION/targets/$TARGET"
 } || {
 	TARGETS_URL="$BASE_URL/snapshots/targets/$TARGET"
