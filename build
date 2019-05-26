@@ -1,0 +1,57 @@
+#!/bin/sh
+#
+# Usage:
+# ./build <community> <build-profile> <device-name>
+
+PWD="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
+# $1 - Community name
+# $2 - Build profile name
+# $3 - Device folder / nickname
+do_build() {
+  PROFILE_PATH="$PWD/communities/$1/$2"
+  if [ -f "$PROFILE_PATH/settings.sh" ]; then
+    . "$PROFILE_PATH/settings.sh"
+  fi
+  . "$PROFILE_PATH/$3/settings.sh"
+  set -x
+  export BIN_DIR="$PROFILE_PATH/bin/$3"
+  export FILES="$PROFILE_PATH/$3/files"
+  set +x
+  ./meta image
+}
+
+if [ -z "$1" ]; then
+  echo "Please specify community"
+  exit 1
+fi
+
+COMMUNITY_PATH="$PWD/communities/$1"
+
+if [ ! -d "$COMMUNITY_PATH" ]; then
+  echo "Community not found in ./communities"
+  exit 1
+fi
+
+if [ -z "$2" ]; then
+  echo "Please specify build profile"
+  exit 1
+fi
+
+PROFILE_PATH="$COMMUNITY_PATH/$2"
+
+if [ ! -d "$PROFILE_PATH" ]; then
+  echo "Build profile not found in ./communities/$1"
+  exit 1
+fi
+
+if [ -z "$3" ]; then
+  echo "Please specify device"
+  exit 1
+fi
+
+if [ ! -f "$PROFILE_PATH/$3/settings.sh"]; then
+  echo "Missing settings.sh for $3"
+fi
+
+do_build "$1" "$2" "$3"
