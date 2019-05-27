@@ -2,8 +2,10 @@
 #
 # Usage:
 # ./build <community> <build-profile> <device-name>
+show_help() { echo "$(grep -m1 -A1 "# Usage:" $PWD/$0)"; echo "# "; }
 
 PWD="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+
 # $1 - Community name
 # $2 - Build profile name
 # $3 - Device folder / nickname
@@ -17,23 +19,36 @@ do_build() {
   export BIN_DIR="$PROFILE_PATH/bin/$3"
   export FILES="$PROFILE_PATH/$3/files"
   set +x
-  ./meta image
+  ./meta image \
+    && : \
+    || exit 1
+
+  echo "[$0] Firmware cooked: ${BIN_DIR}"
+  ls -lh --color=auto ${BIN_DIR}
 }
 
+
 if [ -z "$1" ]; then
-  echo "Please specify community"
+  show_help
+  echo "[$0] Please specify an available community:"
+  for x in $(ls $PWD/communities/); do echo "- $x" ; done
+  echo "[$0] Example:"
+  echo "% $0 massmesh meshpoint ns5ac-loco"
   exit 1
 fi
 
 COMMUNITY_PATH="$PWD/communities/$1"
 
 if [ ! -d "$COMMUNITY_PATH" ]; then
+  show_help
   echo "Community not found in ./communities"
   exit 1
 fi
 
 if [ -z "$2" ]; then
-  echo "Please specify build profile"
+  show_help
+  echo "Please specify a build profile:"
+  for x in $(ls $COMMUNITY_PATH/); do echo "- $x" ; done
   exit 1
 fi
 
@@ -45,12 +60,22 @@ if [ ! -d "$PROFILE_PATH" ]; then
 fi
 
 if [ -z "$3" ]; then
-  echo "Please specify device"
+  show_help
+
+  echo "[$0] Please specify a device:"
+  for x in $(ls $PROFILE_PATH/); do
+    [ -d $PROFILE_PATH/$x ] && \
+    [ x"$x" != "xfiles" ] && \
+    [ x"$x" != "xbin" ] \
+      && echo "- $x" \
+      || :
+  done
   exit 1
 fi
 
-if [ ! -f "$PROFILE_PATH/$3/settings.sh"]; then
+if [ ! -f "$PROFILE_PATH/$3/settings.sh" ]; then
   echo "Missing settings.sh for $3"
 fi
 
 do_build "$1" "$2" "$3"
+
