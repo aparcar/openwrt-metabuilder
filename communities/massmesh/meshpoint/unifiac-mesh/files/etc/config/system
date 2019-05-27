@@ -1,16 +1,36 @@
 
 config system
 	option hostname 'OpenWrt'
-	option timezone 'UTC'
 	option ttylogin '0'
-	option log_size '64'
 	option urandom_seed '0'
+	option zonename 'America/New York'
+	option timezone 'EST5EDT,M3.2.0,M11.1.0'
+	option log_proto 'udp'
+	option conloglevel '8'
+	option cronloglevel '8'
+	option log_size '256'
 
 config timeserver 'ntp'
 	option enabled '1'
-	option enable_server '0'
 	list server '0.openwrt.pool.ntp.org'
 	list server '1.openwrt.pool.ntp.org'
 	list server '2.openwrt.pool.ntp.org'
 	list server '3.openwrt.pool.ntp.org'
+	option enable_server '1'
+
+config led
+	option default '0'
+	option trigger 'netdev'
+	option dev 'br-mesh'
+	option sysfs 'ubnt:white:dome'
+	option mode 'rx'
+	option name 'rad5ghz11s-rx'
+
+config led
+	option default '0'
+	option name 'rad5ghz11s-tx'
+	option sysfs 'ubnt:blue:dome'
+	option trigger 'netdev'
+	option dev 'br-mesh'
+	option mode 'tx'
 

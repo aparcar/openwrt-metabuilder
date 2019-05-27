@@ -22,3 +22,13 @@ config interface 'cjdns'
 	option ifname 'tuncjdns'
 	option proto 'none'
 
+config interface 'bat0_hardif_rad5ghz11s'
+	option proto 'batadv_hardif'
+	option master 'bat0'
+	option mtu '1536'
+
+config interface 'bat0'
+	option proto 'batadv'
+
+
+
