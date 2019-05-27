@@ -1,3 +1,4 @@
+
 config interface 'loopback'
 	option ifname 'lo'
 	option proto 'static'
@@ -16,3 +17,8 @@ config interface 'mesh'
 	option proto 'none'
 	option type 'bridge'
 	option ifname 'eth0.3'
+
+config interface 'cjdns'
+	option ifname 'tuncjdns'
+	option proto 'none'
+

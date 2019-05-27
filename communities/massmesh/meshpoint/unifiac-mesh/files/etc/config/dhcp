@@ -1,3 +1,13 @@
+
 config dhcp 'lan'
 	option interface 'lan'
 	option ignore '1'
+	option dhcpv6 'server'
+	option ra 'server'
+
+config odhcpd 'odhcpd'
+	option maindhcp '0'
+	option leasefile '/tmp/hosts/odhcpd'
+	option leasetrigger '/usr/sbin/odhcpd-update'
+	option loglevel '4'
+
