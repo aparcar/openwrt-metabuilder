@@ -19,7 +19,7 @@ do_build() {
   export BIN_DIR="$PROFILE_PATH/bin/$3"
   export FILES="$PROFILE_PATH/$3/files"
   set +x
-  ./meta image \
+  /bin/sh ./meta image \
     && : \
     || exit 1
 
