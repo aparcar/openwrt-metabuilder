@@ -1,0 +1,15 @@
+config wifi-device 'radio0'
+	option type 'mac80211'
+	option channel '36'
+	option hwmode '11a'
+	option path 'soc/d0070000.pcie/pci0000:00/0000:00:00.0'
+	option htmode 'VHT80'
+	option disabled '0'
+
+config wifi-iface 'default_radio0'
+	option device 'radio0'
+	option network 'lan'
+	option mode 'ap'
+	option ssid 'OpenWrt-Espressobin'
+	option encryption 'none'
+

@@ -1,0 +1,40 @@
+https://openwrt.org/docs/guide-user/services/tor/client
+
+# Intercept DNS and TCP traffic
+uci -q delete firewall.tordns
+uci set firewall.tordns="redirect"
+uci set firewall.tordns.name="Intercept-DNS"
+uci set firewall.tordns.src="lan"
+uci set firewall.tordns.src_dport="53"
+uci set firewall.tordns.dest_port="9053"
+uci set firewall.tordns.family="ipv4"
+uci set firewall.tordns.proto="udp"
+uci set firewall.tordns.target="DNAT"
+uci -q delete firewall.tortrans
+uci set firewall.tortrans="redirect"
+uci set firewall.tortrans.name="Intercept-TCP"
+uci set firewall.tortrans.src="lan"
+uci set firewall.tortrans.src_dport="!22"
+uci set firewall.tortrans.dest_port="9040"
+uci set firewall.tortrans.family="ipv4"
+uci set firewall.tortrans.proto="tcp"
+uci set firewall.tortrans.extra="--syn"
+uci set firewall.tortrans.target="DNAT"
+uci commit firewall
+service firewall restart
+
+
+# Enable NAT6
+opkg update
+opkg install kmod-ipt-nat6
+cat << EOF > /etc/firewall.nat6
+iptables-save --table="nat" \
+| sed -e "/\s[DS]NAT\s/d;/\sMASQUERADE$/d" \
+| ip6tables-restore --table="nat"
+EOF
+uci -q delete firewall.nat6
+uci set firewall.nat6="include"
+uci set firewall.nat6.path="/etc/firewall.nat6"
+uci set firewall.nat6.reload="1"
+uci commit firewall
+service firewall restart

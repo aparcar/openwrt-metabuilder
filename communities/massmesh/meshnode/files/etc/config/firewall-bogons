@@ -1,0 +1,26 @@
+ipset create bogons hash:net
+ipset -A bogons 0.0.0.0/8
+ipset -A bogons 10.0.0.0/8
+ipset -A bogons 100.64.0.0/10
+ipset -A bogons 127.0.0.0/8
+ipset -A bogons 169.254.0.0/16
+ipset -A bogons 172.16.0.0/12
+ipset -A bogons 192.0.0.0/24
+ipset -A bogons 192.0.2.0/24
+ipset -A bogons 192.168.0.0/16
+ipset -A bogons 192.88.99.0/24
+ipset -A bogons 198.18.0.0/15
+ipset -A bogons 198.51.100.0/24
+ipset -A bogons 203.0.113.0/24
+ipset -A bogons 224.0.0.0/4
+ipset -A bogons 240.0.0.0/4
+ipset -A bogons 255.255.255.255/32
+
+
+config rule
+    option name 'Drop-Bogons_In_WAN'
+    option family 'ipv4'
+    option proto 'all'
+    option src 'wan'
+    option extra '-m set --match-set bogons src'
+    option target 'DROP'
