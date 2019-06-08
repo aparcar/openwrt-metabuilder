@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 #
 # based on https://github.com/openwrt/packages/blob/master/.travis_do.sh
 
@@ -10,10 +10,12 @@ VERSION="${VERSION:-18.06.2}"   # default version
 IB_VERSION="${IB_VERSION:-$VERSION}" # ImageBuilder version if different to distro version
 BASE_URL="${BASE_URL:-https://downloads.openwrt.org}" 	# download imagebuilders
 BASE_PATH="$DISTRO/$VERSION/$TARGET" 	        # structure for storing stuff
-IB_DIR="$ROOT_DIR/imagebuilder/$BASE_PATH"	  	# where to store imagebuilders
+IB_DIR="/dev/shm/imagebuilder/$BASE_PATH"	  	# where to store imagebuilders
 BIN_DIR="${BIN_DIR:-$ROOT_DIR/bin/$BASE_PATH}"  # where to store created images
 IB="imagebuilder"   # search sha256sums for this string to find imagebuilder
 BUILD_KEY="${BUILD_KEY:-$ROOT_DIR/key-build}"
+ARIA2C="$(which aria2c)"
+
 
 [ "$IB_VERSION" != "snapshots" ] && {
 	TARGETS_URL="$BASE_URL/releases/$IB_VERSION/targets/$TARGET"
@@ -55,11 +57,20 @@ meta_setup() {
 
 download() {
 	mkdir -p "$IB_DIR"
-	cd "$IB_DIR"
+	[ -h $(echo $TARGET | cut -d/ -f2) ] \
+		&& rm $(echo $TARGET | cut -d/ -f2) \
+		|| : # always re-symlink
+	ln -s "$IB_DIR" .
+	cd "$IB_DIR" || exit
 
 	echo "download checksums and signature"
-	wget "$TARGETS_URL/sha256sums" -O sha256sums
-	wget "$TARGETS_URL/sha256sums.gpg" -O sha256sums.asc
+	if [ x"$ARIA2C" == "x" ]; then
+	    wget "$TARGETS_URL/sha256sums" -O sha256sums
+	    wget "$TARGETS_URL/sha256sums.gpg" -O sha256sums.asc
+	else
+		aria2c "$TARGETS_URL/sha256sums" -o sha256sums --force-save=true
+		aria2c "$TARGETS_URL/sha256sums.gpg" -o sha256sums.asc --force-save=true
+	fi
 
 	echo "verifying sha256sums signature"
 	gpg --verify sha256sums.asc
@@ -77,8 +88,16 @@ download() {
 		echo "remove outdated ImageBuilder files"
 		find . ! -name 'sha256sums.*' -type f -exec rm -f {} +
 		echo "download ImageBuilder"
-		wget "$TARGETS_URL/$ib_archive_name" -O "$ib_archive_name"
-		tar Jxf "$IB_DIR/$ib_archive_name" --strip=1 --overwrite
+		if [ x"$ARIA2C" == "x" ]; then
+			wget "$TARGETS_URL/$ib_archive_name" -O "$ib_archive_name"
+		else
+			aria2c "$TARGETS_URL/$ib_archive_name" -o "$ib_archive_name" \
+				--force-save=true --summary-interval=1
+		fi
+
+		xz --threads=$(grep ^processor /proc/cpuinfo | wc -l) \
+		   --decompress --stdout "$IB_DIR/$ib_archive_name" \
+		| tar x --strip=1 --overwrite
 		# add Makefile which support package_list and  manifest
 		# also modify Makefile based on DISTRO and VERSION
 		# if REPOS is defiend, add them
@@ -90,7 +109,11 @@ download() {
 			die "ImageBuilder can not be verified!"
 		fi
 		mv sha256sums.small sha256sums.current
-		[ -n "$KEEP_IB_TAR" ] || rm -rf "$IB_DIR/$ib_archive_name"
+		if [ -n "$KEEP_IB_TAR" ]; then
+			:
+		elif [ -d "$IB_DIR/$ib_archive_name" ]; then
+			rm -rf "$IB_DIR/$ib_archive_name"
+		fi
 	fi
 
 	# copy BUILD_KEY to imagebuilder folder to sign images

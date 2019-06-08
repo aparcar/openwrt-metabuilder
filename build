@@ -19,11 +19,11 @@ do_build() {
   export BIN_DIR="$PROFILE_PATH/bin/$3"
   export FILES="$PROFILE_PATH/$3/files"
   set +x
-  /bin/sh ./meta image \
+  /usr/bin/env bash ./meta image \
     && : \
     || exit 1
 
-  echo "[$0] Firmware cooked: ${BIN_DIR}"
+  echo "[$0] Firmware cooked: ${BIN_DIR}/"
   ls -lh --color=auto ${BIN_DIR}
 }
 
