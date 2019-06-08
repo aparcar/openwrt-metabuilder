@@ -1,4 +1,23 @@
-# meta ImageBuilder
+# massmesh ./build usage
+
+### Build a meshnode profile for espressobin
+`./build massmesh meshnode espressobin`
+
+### Build a for a wireless meshpoint for nanostation 
+`./build massmesh meshpoint ns5ac-loco`
+
+### More info
+```
+# Usage:
+# ./build <community> <build-profile> <device-name>
+# 
+[./build] Please specify an available community:
+- massmesh
+[./build] Example:
+% ./build massmesh meshpoint ns5ac-loco
+```
+
+# meta ImageBuilder (Called by ./build)
 
 Instead of downloading (and updating) ImageBuilders manually, this script does
 all the work. Automatically download ImageBuilder and create desired image.
