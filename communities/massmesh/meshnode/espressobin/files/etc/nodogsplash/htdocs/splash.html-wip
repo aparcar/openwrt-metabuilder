@@ -1,1 +1,53 @@
-<h3> Click <a href="$authtarget"> HERE</a> to start browsing </h3>
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="shortcut icon" href="/$imagesdir/splash.jpg" type="image/x-icon">
+<link rel="stylesheet" type="text/css" href="/splash.css">
+
+<title>MassMesh.org - via Cooperative Gateway Box (version:f6dc23 </title>
+
+</head>
+
+
+<body>
+<div class="offset">
+<center><b>OpenWrt + MassMesh - a Cooperative Gateway Offer</b></center>
+<div class="insert">
+<br><br>
+<center>
+<img height="200" width="500" src="$imagesdir/splash.jpg" alt="Splash Page: For access to the Internet, please click Continue.">
+</center>
+
+<br><br>
+<hr>
+
+<form method="get" action="$authaction">
+<input type="hidden" name="tok" value="$tok">
+<input type="hidden" name="redir" value="$redir">
+<center>
+<input type="submit" value="¡Ya Vamos!">
+</form>
+
+<hr>
+<copy-right>Copyright &copy; The Nodogsplash Contributors 2004-2019.<br>This software is released under the GNU GPL license.</copy-right>
+</center>
+<pre>
+      ,           ,
+     /             \      .g8"""bgd `7MN.   `7MF'`7MMF'   `7MF'
+    ((__-^^-,-^^-__))   .dP'     `M   MMN.    M    MM       M
+     `-_---' `---_-'    dM'       `   M YMb   M    MM       M
+      `--|o` 'o|--'     MM            M  `MN. M    MM       M
+         \  `  /        MM.    `7MMF' M   `MM.M    MM       M
+          ): :(         `Mb.     MM   M     YMM    YM.     ,M
+          :o_o:           `"bmmmdPY .JML.    YM     `bmmmmd"'
+           "-"     -- foundation for cooperative information systems
+</pre>
+</div></div>
+</body>
+</html>
