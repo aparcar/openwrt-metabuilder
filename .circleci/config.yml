@@ -10,15 +10,14 @@ jobs:
           name: Install Dependencies
           command: 'apt-get update && apt-get install -y gnupg aria2 xz-utils make perl gcc g++ libncurses5-dev gawk unzip bzip2 wget python git file'
       - run:
-          name: patch
-          command: sed -i '/IB_DIR=/ s/\/dev\/shm/$ROOT_DIR/' ./meta
+          name: Patch builder and bin directory
+          command: sed -i '/IB_DIR=/ s/\/dev\/shm/$ROOT_DIR/' ./meta && sed -i '/BIN_DIR=/ s/$PROFILE_PATH\/bin\/$3/$PWD\/bin\/$1\/$2\/$3/' ./build
       - run:
           name: Build Mesh Node Espressobin
           command: './build massmesh meshnode espressobin'
       - store_artifacts:
-          path: './communities/massmesh/meshnode/bin/espressobin'
-      - run:
-          name: Build Mesh Radio NS 5AC Loco
-          command: './build massmesh meshpoint ns5ac-loco'
-      - store_artifacts:
-          path: './communities/massmesh/meshpoint/bin/ns5ac-loco'
+          path: './bin'
+          destination: '/'
+      #- run:
+      #    name: Build Mesh Radio NS 5AC Loco
+      #    command: './build massmesh meshpoint ns5ac-loco'
