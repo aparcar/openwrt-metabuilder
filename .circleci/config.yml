@@ -27,7 +27,7 @@ jobs:
       - deploy:
           name: "Publish Artifacts"
           command: |
-            if [ "${CIRCLE_BRANCH}" == "ci-test" ]; then
+            if [ "${CIRCLE_BRANCH}" == "master" ]; then
               cd bin
               git init
               git config user.email "circle@circleci.com"
