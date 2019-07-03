@@ -7,6 +7,9 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Install Dependencies
+          command: 'apt-get update && apt-get install -y gnupg'
+      - run:
           name: Build Mesh Node Espressobin
           command: './build massmesh meshnode espressobin'
       - store_artifacts:
