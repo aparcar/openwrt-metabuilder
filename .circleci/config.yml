@@ -6,18 +6,34 @@ jobs:
 
     steps:
       - checkout
+      - add_ssh_keys:
+          fingerprints:
+            - "9c:ec:6c:01:d7:c6:10:2d:a5:41:ab:c3:ef:44:13:46"
       - run:
           name: Install Dependencies
           command: 'apt-get update && apt-get install -y gnupg aria2 xz-utils make perl gcc g++ libncurses5-dev gawk unzip bzip2 wget python git file'
       - run:
-          name: Patch builder and bin directory
+          name: Patch Builder and Bin Directory
           command: sed -i '/IB_DIR=/ s/\/dev\/shm/$ROOT_DIR/' ./meta && sed -i '/BIN_DIR=/ s/$PROFILE_PATH\/bin\/$3/$PWD\/bin\/$1\/$2\/$3/' ./build
       - run:
           name: Build Mesh Node Espressobin
           command: './build massmesh meshnode espressobin'
-      - store_artifacts:
-          path: './bin'
-          destination: '/'
       #- run:
       #    name: Build Mesh Radio NS 5AC Loco
       #    command: './build massmesh meshpoint ns5ac-loco'
+      - store_artifacts:
+          path: './bin'
+          destination: '/'
+      - deploy:
+          name: "Publish Artifacts"
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "ci-test" ]; then
+              cd bin
+              git init
+              git config user.email "circle@circleci.com"
+              git config user.name "CircleCI"
+              git remote add origin git@github.com:MassMesh/meta-imagebuilder-artifacts.git
+              git add .
+              git commit -m "Commit artifacts."
+              GIT_SSH_COMMAND="ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" git push origin master --force
+            fi
