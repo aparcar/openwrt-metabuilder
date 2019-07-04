@@ -20,7 +20,7 @@ jobs:
           command: './build massmesh meshnode espressobin'
       #- run:
       #    name: Build Mesh Radio NS 5AC Loco
-      #    command: './build massmesh meshpoint ns5ac-loco'
+      #    command: './build massmesh meshradio ns5ac-loco'
       - store_artifacts:
           path: './bin'
           destination: '/'
