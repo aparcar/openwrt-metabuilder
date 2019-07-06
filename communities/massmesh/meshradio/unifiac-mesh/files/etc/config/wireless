@@ -31,7 +31,6 @@ config wifi-iface 'default_rad2ghz'
 	option device 'rad2ghz'
 	option network 'lan'
 	option mode 'ap'
-	option ssid 'MassMesh.org_2GHz'
+	option ssid 'MassMesh'
 	option encryption 'none'
 	option ifname 'rad2ghzAP'
-

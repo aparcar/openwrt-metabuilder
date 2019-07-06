@@ -2,6 +2,6 @@
 
 set -x
 
-export EXTRA_IMAGE_NAME="massmesh-meshpoint"
+export EXTRA_IMAGE_NAME="massmesh-meshradio"
 
 set +x
