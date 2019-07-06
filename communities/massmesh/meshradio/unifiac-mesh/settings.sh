@@ -4,8 +4,8 @@ set -x
 
 export VERSION="snapshots"
 
-export TARGET="ar71xx/generic"
-export PROFILE="ubnt-unifiac-mesh"
+export TARGET="ath79/generic"
+export PROFILE="ubnt_unifiac-mesh"
 export PACKAGES="""-wpad-basic \
 tcpdump \
 mini_snmpd \

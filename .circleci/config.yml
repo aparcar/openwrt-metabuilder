@@ -21,6 +21,9 @@ jobs:
       - run:
          name: Build Mesh Radio NS 5AC Loco
          command: './build massmesh meshradio ns5ac-loco'
+      - run:
+         name: Build Mesh Radio UAP AC Mesh
+         command: './build massmesh meshradio unifiac-mesh'
       - store_artifacts:
           path: './bin'
           destination: '/'
