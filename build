@@ -33,7 +33,7 @@ if [ -z "$1" ]; then
   echo "[$0] Please specify an available community:"
   for x in $(ls $PWD/communities/); do echo "- $x" ; done
   echo "[$0] Example:"
-  echo "% $0 massmesh meshpoint ns5ac-loco"
+  echo "% $0 massmesh meshradio ns5ac-loco"
   exit 1
 fi
 

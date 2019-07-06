@@ -3,8 +3,8 @@
 ### Build a meshnode profile for espressobin
 `./build massmesh meshnode espressobin`
 
-### Build a for a wireless meshpoint for nanostation 
-`./build massmesh meshpoint ns5ac-loco`
+### Build a for a wireless meshradio for nanostation 
+`./build massmesh meshradio ns5ac-loco`
 
 ### More info
 ```
@@ -14,7 +14,7 @@
 [./build] Please specify an available community:
 - massmesh
 [./build] Example:
-% ./build massmesh meshpoint ns5ac-loco
+% ./build massmesh meshradio ns5ac-loco
 ```
 
 # meta ImageBuilder (Called by ./build)
