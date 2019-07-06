@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: debian:stretch
+      - image: debian:buster
 
     steps:
       - checkout
@@ -17,13 +17,13 @@ jobs:
           command: sed -i '/IB_DIR=/ s/\/dev\/shm/$ROOT_DIR/' ./meta && sed -i '/BIN_DIR=/ s/$PROFILE_PATH\/bin\/$3/$PWD\/bin\/$1\/$2\/$3/' ./build
       - run:
           name: Build Mesh Node Espressobin
-          command: './build massmesh meshnode espressobin'
+          command: './build massmesh meshnode globalscale_espressobin'
       - run:
          name: Build Mesh Radio NS 5AC Loco
-         command: './build massmesh meshradio ns5ac-loco'
+         command: './build massmesh meshradio ubnt_nanostation-ac-loco'
       - run:
          name: Build Mesh Radio UAP AC Mesh
-         command: './build massmesh meshradio unifiac-mesh'
+         command: './build massmesh meshradio ubnt_unifiac-mesh'
       - store_artifacts:
           path: './bin'
           destination: '/'
