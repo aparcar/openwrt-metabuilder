@@ -123,6 +123,25 @@ download() {
         fi
         mv sha256sums.small sha256sums.current
         [ -n "$KEEP_IB_TAR" ] || rm -rf "$IB_DIR/$ib_archive_name"
+
+        # apply patches from patches folder
+        [ -d "$ROOT_DIR/patches/" ] && (
+            for patch_file in $(find $ROOT_DIR/patches/ -type f); do
+                patch -p1 < "$patch_file"
+            done
+        )
+
+        # link files folder if it exists
+        [ -d "$ROOT_DIR/files/" ] && (
+            ln -s "$ROOT_DIR/files/" ./files
+        )
+
+        # run scripts from script folder
+        [ -d "$ROOT_DIR/scripts/" ] && (
+            for script_file in $(find $ROOT_DIR/scripts/ -type f); do
+                bash "$script_file"
+            done
+        )
     fi
 
     # copy BUILD_KEY to imagebuilder folder to sign images
