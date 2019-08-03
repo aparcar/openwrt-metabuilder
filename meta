@@ -64,9 +64,9 @@ download() {
     cd "$IB_DIR"
 
     echo "download checksums and signature"
-    wget "$TARGETS_URL/sha256sums" -O sha256sums
-    wget "$TARGETS_URL/sha256sums.gpg" -O sha256sums.asc || true
-    wget "$TARGETS_URL/sha256sums.sig" -O sha256sums.sig || true
+    curl "$TARGETS_URL/sha256sums" -sS -o sha256sums
+    curl "$TARGETS_URL/sha256sums.asc" -fs -o sha256sums.asc || true
+    curl "$TARGETS_URL/sha256sums.sig" -fs -o sha256sums.sig || true
 
     if [ ! -f sha256sums.asc ] && [ ! -f sha256sums.sig ]; then
         die "Missing sha256sums signature files"
