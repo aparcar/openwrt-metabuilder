@@ -14,20 +14,20 @@ set -x
 if [ $(mktemp -p /dev/shm/ 2>/dev/null) ] \
 && [ x"$(mount | grep '/dev/shm type tmpfs' | grep -q 'noexec'; echo $?)" == x"0" ]
 then
-	# tmpfs mounted with noexec
+	# tmpfs mounted with noexec (Use/Avoid)
 	IB_DIR="/dev/shm/imagebuilder/$BASE_PATH"
 else
-	# tmpfs mounted without noexec
+	# tmpfs mounted without noexec (Use/Avoid)
 	IB_DIR="$ROOT_DIR/imagebuilder/$BASE_PATH"
 fi
 
 echo IB_DIR==${IB_DIR}
-exit 127
 BIN_DIR="${BIN_DIR:-$ROOT_DIR/bin/$BASE_PATH}"  # where to store created images
 IB="imagebuilder"   # search sha256sums for this string to find imagebuilder
 BUILD_KEY="${BUILD_KEY:-$ROOT_DIR/key-build}"
 ARIA2C="$(which aria2c)"
 
+set +x
 set -e
 
 
