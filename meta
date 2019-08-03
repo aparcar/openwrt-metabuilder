@@ -8,11 +8,26 @@ VERSION="${VERSION:-18.06.2}"   # default version
 IB_VERSION="${IB_VERSION:-$VERSION}" # ImageBuilder version if different to distro version
 BASE_URL="${BASE_URL:-https://downloads.openwrt.org}" 	# download imagebuilders
 BASE_PATH="$DISTRO/$VERSION/$TARGET" 	        # structure for storing stuff
+
+if [ `mktemp -p /dev/shm/ 2>/dev/null` ]; then
+	echo "TEST_1=PASS"
+else
+	echo "TEST_1=FAIL"
+fi
+
+if [ `mount |grep /dev/shm |grep -q noexec` ]; then
+	echo "TEST_2=PASS"
+else
+	echo "TEST_2=FAIL"
+fi
+
 if [ `mktemp -p /dev/shm/ 2>/dev/null` ] && [ `mount |grep /dev/shm |grep -q noexec` ]; then
 	IB_DIR="/dev/shm/imagebuilder/$BASE_PATH"	  	# where to store imagebuilders
 else
 	IB_DIR="$ROOT_DIR/imagebuilder/$BASE_PATH"     # where to store imagebuilders
 fi
+echo IB_DIR==${IB_DIR}
+exit 127
 BIN_DIR="${BIN_DIR:-$ROOT_DIR/bin/$BASE_PATH}"  # where to store created images
 IB="imagebuilder"   # search sha256sums for this string to find imagebuilder
 BUILD_KEY="${BUILD_KEY:-$ROOT_DIR/key-build}"
