@@ -11,7 +11,7 @@ jobs:
             - "9c:ec:6c:01:d7:c6:10:2d:a5:41:ab:c3:ef:44:13:46"
       - run:
           name: Install Dependencies
-          command: 'apt-get update && apt-get install -y gnupg aria2 xz-utils make perl gcc g++ libncurses5-dev gawk unzip bzip2 wget python git file'
+          command: 'apt-get update && apt-get install -y gnupg aria2 xz-utils make perl gcc g++ libncurses5-dev gawk unzip bzip2 wget python3 git file'
       - run:
           name: Patch Builder and Bin Directory
           command: sed -i '/IB_DIR=/ s/\/dev\/shm/$ROOT_DIR/' ./meta && sed -i '/BIN_DIR=/ s/$PROFILE_PATH\/bin\/$3/$PWD\/bin\/$1\/$2\/$3/' ./build

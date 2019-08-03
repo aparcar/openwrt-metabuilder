@@ -2,6 +2,7 @@
 #
 # Usage:
 # ./build <community> <build-profile> <device-name>
+exit 0
 show_help() { echo "$(grep -m1 -A1 "# Usage:" $PWD/$0)"; echo "# "; }
 
 PWD="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
