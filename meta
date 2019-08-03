@@ -8,11 +8,19 @@ VERSION="${VERSION:-18.06.2}"   # default version
 IB_VERSION="${IB_VERSION:-$VERSION}" # ImageBuilder version if different to distro version
 BASE_URL="${BASE_URL:-https://downloads.openwrt.org}" 	# download imagebuilders
 BASE_PATH="$DISTRO/$VERSION/$TARGET" 	        # structure for storing stuff
-if [ `mktemp -p /dev/shm/ 2>/dev/null` ] && [ `mount |grep /dev/shm |grep -q noexec` ]; then
-	IB_DIR="/dev/shm/imagebuilder/$BASE_PATH"	  	# where to store imagebuilders
+
+# If /dev/shm is mounted noexec, then <Use/Avoid> building in RAM
+if [ $(mktemp -p /dev/shm/ 2>/dev/null) ] \
+&& [ x"$(mount | grep '/dev/shm type tmpfs' | grep -q 'noexec'; echo $?)" == x"0" ]
+then
+	# Avoid: /dev/shm: tmpfs mounted with noexec
+	IB_DIR="$ROOT_DIR/imagebuilder/$BASE_PATH"
 else
-	IB_DIR="$ROOT_DIR/imagebuilder/$BASE_PATH"     # where to store imagebuilders
+	# Use: tmpfs yields faster buildtimes
+	IB_DIR="/dev/shm/imagebuilder/$BASE_PATH"
 fi
+
+echo IB_DIR==${IB_DIR}
 BIN_DIR="${BIN_DIR:-$ROOT_DIR/bin/$BASE_PATH}"  # where to store created images
 IB="imagebuilder"   # search sha256sums for this string to find imagebuilder
 BUILD_KEY="${BUILD_KEY:-$ROOT_DIR/key-build}"
