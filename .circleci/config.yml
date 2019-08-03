@@ -1,0 +1,41 @@
+version: 2
+jobs:
+  dockerbuild:
+    machine:
+      image: ubuntu-1604:201903-01
+    environment:
+      DOCKER_IMAGE: "aparcar/openwrt-metabuilder"
+    steps:
+      - run: sudo apt update && sudo apt install signify-openbsd
+      - checkout
+      - run: bash .ci/docker-build.sh
+
+  dockertest-alpine:
+    docker:
+      - image: "aparcar/openwrt-metabuilder:alpine"
+    environment:
+      TARGET: "ramips/mt7621"
+      PROFILE: "netgear_r6220"
+    steps:
+      - run: bash ./meta
+
+  dockertest-debian:
+    docker:
+      - image: "aparcar/openwrt-metabuilder:debian"
+    environment:
+      TARGET: "ramips/mt7621"
+      PROFILE: "netgear_r6220"
+    steps:
+      - run: bash ./meta
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - dockerbuild
+#      - dockertest-alpine:
+#          requires:
+#            - dockerbuild
+#      - dockertest-debian:
+#          requires:
+#            - dockerbuild

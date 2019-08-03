@@ -1,0 +1,29 @@
+dockerbuild:
+  image: docker:latest
+  stage: build
+  services:
+    - docker:dind
+  before_script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+  script:
+    - docker build -t "$CI_REGISTRY_IMAGE:alpine$CI_COMMIT_REF_SLUG" -f ".ci/Dockerfile.alpine" .
+    - docker build -t "$CI_REGISTRY_IMAGE:debian$CI_COMMIT_REF_SLUG" -f ".ci/Dockerfile.debian" .
+    - docker push "$CI_REGISTRY_IMAGE"
+
+dockertest-alpine:
+  image: "$CI_REGISTRY_IMAGE:alpine$CI_COMMIT_REF_SLUG"
+  stage: test
+  variables:
+    TARGET: "ath79/generic"
+    PROFILE: "tplink_archer-c7-v1"
+  script:
+    - bash ./meta
+
+dockertest-debian:
+  image: "$CI_REGISTRY_IMAGE:debian$CI_COMMIT_REF_SLUG"
+  stage: test
+  variables:
+    TARGET: "ath79/generic"
+    PROFILE: "tplink_archer-c7-v1"
+  script:
+    - bash ./meta

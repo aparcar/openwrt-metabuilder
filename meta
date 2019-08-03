@@ -4,120 +4,152 @@
 
 set -e
 
-ROOT_DIR="$PWD"			# where the script is
-DISTRO="${DISTRO:-openwrt}"	# the folder where to store created files
-VERSION="${VERSION:-18.06.2}"   # default version
+ROOT_DIR="$PWD" # where the script is
+DISTRO="${DISTRO:-openwrt}" # the folder where to store created files
+VERSION="${VERSION:-snapshot}" # default version
 IB_VERSION="${IB_VERSION:-$VERSION}" # ImabeBuilder version if different to distro version
-BASE_URL="${BASE_URL:-https://downloads.openwrt.org}" 	# download imagebuilders
-BASE_PATH="$DISTRO/$VERSION/$TARGET" 	        # structure for storing stuff
-IB_DIR="$ROOT_DIR/imagebuilder/$BASE_PATH"	  	# where to store imagebuilders
-BIN_DIR="${BIN_DIR:-$ROOT_DIR/bin/$BASE_PATH}"  # where to store created images
-IB="imagebuilder"   # search sha256sums for this string to find imagebuilder
+BASE_URL="${BASE_URL:-https://downloads.openwrt.org}" # download imagebuilders
+BASE_PATH="$DISTRO/$VERSION/$TARGET" # structure for storing stuff
+IB_DIR="$ROOT_DIR/imagebuilder/$BASE_PATH" # where to store imagebuilders
+BIN_DIR="${BIN_DIR:-$ROOT_DIR/bin/$BASE_PATH}" # where to store created images
+IB="imagebuilder" # search sha256sums for this string to find imagebuilder
 BUILD_KEY="${BUILD_KEY:-$ROOT_DIR/key-build}"
 
 [ "$IB_VERSION" != "snapshot" ] && {
-	TARGETS_URL="$BASE_URL/releases/$IB_VERSION/targets/$TARGET"
+    TARGETS_URL="$BASE_URL/releases/$IB_VERSION/targets/$TARGET"
 } || {
-	TARGETS_URL="$BASE_URL/snapshots/targets/$TARGET"
+    TARGETS_URL="$BASE_URL/snapshots/targets/$TARGET"
 }
 
 # parse the sha256sums file to determine the ImageBuilder name
 get_ib_archive_name() {
-	if [ -e "$IB_DIR/sha256sums" ] ; then
-		grep -- "$IB" "$IB_DIR/sha256sums" | awk '{print $2}' | sed -e "s/*//g"
-	else
-		false
-	fi
+    if [ -e "$IB_DIR/sha256sums" ] ; then
+        grep -- "$IB" "$IB_DIR/sha256sums" | awk '{print $2}' | sed -e "s/*//g"
+    else
+        false
+    fi
 }
 
 # return the architecture of the ImageBuilder based on .config contents
 get_ib_arch() {
-	[ -d "$IB_DIR" ] && {
-		(cd "$IB_DIR" &&
-			grep CONFIG_TARGET_ARCH_PACKAGES .config | cut -d= -f2 | tr -d \"
-		)
-	} || echo "unknown"
+    [ -d "$IB_DIR" ] && {
+        (cd "$IB_DIR" &&
+            grep CONFIG_TARGET_ARCH_PACKAGES .config | cut -d= -f2 | tr -d \"
+        )
+    } || echo "unknown"
 }
 
 meta_setup() {
-	# LEDE Build System (LEDE GnuPG key for unattended build jobs)
-	gpg --import "$ROOT_DIR/keys/626471F1.asc"
-	echo '54CC74307A2C6DC9CE618269CD84BCED626471F1:6:' | gpg --import-ownertrust
-	# LEDE Release Builder (17.01 "Reboot" Signing Key)
-	gpg --import $ROOT_DIR/keys/D52BBB6B.asc
-	echo 'B09BE781AE8A0CD4702FDCD3833C6010D52BBB6B:6:' | gpg --import-ownertrust
-	# OpenWrt Release Builder (18.06 Signing Key)
-	gpg --import $ROOT_DIR/keys/17E1CE16.asc
-	echo '6768C55E79B032D77A28DA5F0F20257417E1CE16:6:' | gpg --import-ownertrust
+    # LEDE Build System (LEDE GnuPG key for unattended build jobs)
+    curl 'https://git.openwrt.org/?p=keyring.git;a=blob_plain;f=gpg/626471F1.asc' | gpg --import \
+        && echo '54CC74307A2C6DC9CE618269CD84BCED626471F1:6:' | gpg --import-ownertrust
 
-	touch "$ROOT_DIR/.meta_setup"
+    # LEDE Release Builder (17.01 "Reboot" Signing Key)
+    curl 'https://git.openwrt.org/?p=keyring.git;a=blob_plain;f=gpg/D52BBB6B.asc' | gpg --import \
+        && echo 'B09BE781AE8A0CD4702FDCD3833C6010D52BBB6B:6:' | gpg --import-ownertrust
+
+    # OpenWrt Release Builder (18.06 Signing Key)
+    curl 'https://git.openwrt.org/?p=keyring.git;a=blob_plain;f=gpg/17E1CE16.asc' | gpg --import \
+        && echo '6768C55E79B032D77A28DA5F0F20257417E1CE16:6:' | gpg --import-ownertrust
+
+    # LEDE Build System (LEDE usign key for unattended build jobs)
+    curl 'https://git.openwrt.org/?p=keyring.git;a=blob_plain;f=usign/b5043e70f9a75cde' --create-dirs \
+     -o ./usign/b5043e70f9a75cde
+
+    touch "$ROOT_DIR/.meta_setup"
 }
 
 download() {
-	mkdir -p "$IB_DIR"
-	cd "$IB_DIR"
+    mkdir -p "$IB_DIR"
+    cd "$IB_DIR"
 
-	echo "download checksums and signature"
-	wget "$TARGETS_URL/sha256sums" -O sha256sums
-	wget "$TARGETS_URL/sha256sums.gpg" -O sha256sums.asc
+    echo "download checksums and signature"
+    wget "$TARGETS_URL/sha256sums" -O sha256sums
+    wget "$TARGETS_URL/sha256sums.gpg" -O sha256sums.asc || true
+    wget "$TARGETS_URL/sha256sums.sig" -O sha256sums.sig || true
 
-	echo "verifying sha256sums signature"
-	gpg --verify sha256sums.asc
-	echo "verified sha256sums signature."
-	if ! grep -- "$IB" sha256sums > sha256sums.small ; then
-		die "can not find $IB file in sha256sums. Is \$IB out of date?"
-	fi
+    if [ ! -f sha256sums.asc ] && [ ! -f sha256sums.sig ]; then
+        die "Missing sha256sums signature files"
+    fi
 
-	touch sha256sums.current
-	# if missing, outdated or invalid, download again
-	if [ "$(cat sha256sums.small)" != "$(cat sha256sums.current)" ] ; then
-		local ib_archive_name
-		ib_archive_name="$(get_ib_archive_name)"
-		echo "sha256 doesn't match or ImageBuilder file wasn't downloaded yet."
-		echo "remove outdated ImageBuilder files"
-		find . ! -name 'sha256sums.*' -type f -exec rm -f {} +
-		echo "download ImageBuilder"
-		wget "$TARGETS_URL/$ib_archive_name" -O "$ib_archive_name"
-		tar Jxf "$IB_DIR/$ib_archive_name" --strip=1 --overwrite
-		# add Makefile which support package_list and  manifest
-		# also modify Makefile based on DISTRO and VERSION
-		# if REPOS is defiend, add them
-		[ -n "$REPOS" ] && custom_repos
+    echo "verifying sha256sums signature"
+    [ ! -f sha256sums.asc ] || gpg --with-fingerprint --verify sha256sums.asc sha256sums
 
-		# check again and fail here if the file is still bad
-		echo "Checking sha256sum a second time"
-		if ! sha256sum -c ./sha256sums.small ; then
-			die "ImageBuilder can not be verified!"
-		fi
-		mv sha256sums.small sha256sums.current
-		[ -n "$KEEP_IB_TAR" ] || rm -rf "$IB_DIR/$ib_archive_name"
-	fi
+    if [ -f sha256sums.sig ]; then
+        if hash signify-openbsd 2>/dev/null; then
+            SIGNIFY_BIN=signify-openbsd # debian
+        else
+            SIGNIFY_BIN=signify # alpine
+        fi
+        VERIFIED=
+        for KEY in "$ROOT_DIR"/usign/*; do
+            echo "Trying $KEY..."
+            if "$SIGNIFY_BIN" -V -q -p "$KEY" -x sha256sums.sig -m sha256sums; then
+                echo "...verified"
+                VERIFIED=1
+                break
+            fi
+        done
+        if [ -z "$VERIFIED" ]; then
+            die "Could not verify usign signature"
+        fi
+    fi
 
-	# copy BUILD_KEY to imagebuilder folder to sign images
-	[ -e "$BUILD_KEY" ] && ln -sf "$BUILD_KEY" "$IB_DIR/key-build"
-	[ -e "$BUILD_KEY.ucert" ] && ln -sf "$BUILD_KEY.ucert" "$IB_DIR/key-build.ucert"
+    echo "verified sha256sums signature."
+    if ! grep -- "$IB" sha256sums > sha256sums.small ; then
+        die "can not find $IB file in sha256sums. Is \$IB out of date?"
+    fi
 
-	echo "ImageBuilder is up-to-date"
+    touch sha256sums.current
+    # if missing, outdated or invalid, download again
+    if [ "$(cat sha256sums.small)" != "$(cat sha256sums.current)" ] ; then
+        local ib_archive_name
+        ib_archive_name="$(get_ib_archive_name)"
+        echo "sha256 doesn't match or ImageBuilder file wasn't downloaded yet."
+        echo "remove outdated ImageBuilder files"
+        find . ! -name 'sha256sums.*' -type f -exec rm -f {} +
+        echo "download ImageBuilder"
+        wget "$TARGETS_URL/$ib_archive_name" -O "$ib_archive_name"
+        tar Jxf "$IB_DIR/$ib_archive_name" --strip=1 --overwrite
+        # add Makefile which support package_list and  manifest
+        # also modify Makefile based on DISTRO and VERSION
+        # if REPOS is defiend, add them
+        [ -n "$REPOS" ] && custom_repos
+
+        # check again and fail here if the file is still bad
+        echo "Checking sha256sum a second time"
+        if ! sha256sum -c ./sha256sums.small ; then
+            die "ImageBuilder can not be verified!"
+        fi
+        mv sha256sums.small sha256sums.current
+        [ -n "$KEEP_IB_TAR" ] || rm -rf "$IB_DIR/$ib_archive_name"
+    fi
+
+    # copy BUILD_KEY to imagebuilder folder to sign images
+    [ -e "$BUILD_KEY" ] && ln -sf "$BUILD_KEY" "$IB_DIR/key-build"
+    [ -e "$BUILD_KEY.ucert" ] && ln -sf "$BUILD_KEY.ucert" "$IB_DIR/key-build.ucert"
+
+    echo "ImageBuilder is up-to-date"
 }
 
 custom_repos() {
-	# ability to add custom repositories
-	echo "$REPOS" > "$IB_DIR/repositories.conf"
-	sed -i \
-		-e "s/{{ pkg_arch }}/$(get_ib_arch)/" \
-		-e "s#{{ target }}#$TARGET#" \
-		-e "s/{{ ib_version }}/${IB_VERSION:-$VERSION}/" \
-		-e "s/{{ version }}/$VERSION/" \
-		"$IB_DIR/repositories.conf"
+    # ability to add custom repositories
+    echo "$REPOS" > "$IB_DIR/repositories.conf"
+    sed -i \
+        -e "s/{{ pkg_arch }}/$(get_ib_arch)/" \
+        -e "s#{{ target }}#$TARGET#" \
+        -e "s/{{ ib_version }}/${IB_VERSION:-$VERSION}/" \
+        -e "s/{{ version }}/$VERSION/" \
+        "$IB_DIR/repositories.conf"
 }
 
 die() {
-	echo $1
-	exit 1
+    echo $1
+    exit 1
 }
 
 # setup this meta script if not already done
-[ ! -d "$ROOT_DIR/.meta_setup" ] && meta_setup
+[ ! -e "$ROOT_DIR/.meta_setup" ] && meta_setup
 
 # check if required vars a given
 [ -n "$TARGET" ] || die "missing \$TARGET"
@@ -131,9 +163,9 @@ die() {
 # run `make image` and pass variables
 (cd "$IB_DIR" &&
 make "$1" \
-	PROFILE="$PROFILE" \
-	PACKAGES="$PACKAGES" \
-	BIN_DIR="$BIN_DIR" \
-	EXTRA_IMAGE_NAME="$EXTRA_IMAGE_NAME" \
-	FILES="$FILES"
+    PROFILE="$PROFILE" \
+    PACKAGES="$PACKAGES" \
+    BIN_DIR="$BIN_DIR" \
+    EXTRA_IMAGE_NAME="$EXTRA_IMAGE_NAME" \
+    FILES="$FILES"
 )
