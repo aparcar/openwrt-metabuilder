@@ -15,6 +15,7 @@ RUN apk update && \
             ncurses-dev \
             outils-signify \
             perl \
+            python2 \
             python3 \
             rsync \
             unzip \

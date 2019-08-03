@@ -1,18 +1,31 @@
 version: 2
 jobs:
-  test-alpine:
+  test-alpine-1806:
+    docker:
+      - image: "alpine:latest"
+    environment:
+      TARGET: "ar71xx/generic"
+      PROFILE: "archer-c7-v4"
+      VERSION: "18.06.4"
+    steps:
+      - run: apk add alpine-sdk gnupg bash bzip2 coreutils curl file findutils gawk grep linux-headers ncurses-dev outils-signify perl python2 python3 rsync unzip wget xz zlib-dev
+      - checkout
+      - run: bash ./meta image
+      - run: ls ./bin/openwrt/$VERSION/$TARGET/*sysupgrade.bin
+
+  test-alpine-snapshot:
     docker:
       - image: "alpine:latest"
     environment:
       TARGET: "ath79/generic"
       PROFILE: "tplink_archer-c7-v1"
     steps:
-      - run: apk add alpine-sdk gnupg bash bzip2 coreutils curl file findutils gawk grep linux-headers ncurses-dev outils-signify perl python3 rsync unzip wget xz zlib-dev
+      - run: apk add alpine-sdk gnupg bash bzip2 coreutils curl file findutils gawk grep linux-headers ncurses-dev outils-signify perl python2 python3 rsync unzip wget xz zlib-dev
       - checkout
       - run: bash ./meta image
       - run: ls ./bin/openwrt/snapshot/$TARGET/*sysupgrade.bin
 
-  test-debian:
+  test-debian-snapshot:
     docker:
       - image: "debian:latest"
     environment:
@@ -20,7 +33,7 @@ jobs:
       PROFILE: "tplink_archer-c7-v1"
     steps:
       - run: apt-get update -qq
-      - run: apt-get install -y build-essential curl file gawk gettext git libncurses5-dev libssl-dev python3 signify-openbsd subversion swig unzip wget zlib1g-dev
+      - run: apt-get install -y build-essential curl file gawk gettext git libncurses5-dev libssl-dev python2.7 python3 signify-openbsd subversion swig unzip wget zlib1g-dev
       - checkout
       - run: bash ./meta image
       - run: ls ./bin/openwrt/snapshot/$TARGET/*sysupgrade.bin
@@ -41,12 +54,14 @@ workflows:
   version: 2
   build_test_deploy:
     jobs:
-      - test-alpine
-      - test-debian
+      - test-alpine-snapshot
+      - test-alpine-1806
+      - test-debian-snapshot
       - deploy-docker:
           requires:
-            - test-alpine
-            - test-debian
+            - test-alpine-snapshot
+            - test-alpine-1806
+            - test-debian-snapshot
           filters:
             branches:
               only:
