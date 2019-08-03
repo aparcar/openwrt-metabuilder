@@ -1,41 +1,63 @@
 version: 2
 jobs:
-  dockerbuild:
+  build-docker:
     machine:
       image: ubuntu-1604:201903-01
     environment:
       DOCKER_IMAGE: "aparcar/openwrt-metabuilder"
     steps:
-      - run: sudo apt update && sudo apt install signify-openbsd
       - checkout
-      - run: bash .ci/docker-build.sh
+      - run: docker build -t "$DOCKER_IMAGE:alpine" -f ".ci/Dockerfile.alpine" .
+      - run: docker build -t "$DOCKER_IMAGE:debian" -f ".ci/Dockerfile.debian" .
 
-  dockertest-alpine:
+  test-alpine:
     docker:
-      - image: "aparcar/openwrt-metabuilder:alpine"
+      - image: "alpine:latest"
     environment:
-      TARGET: "ramips/mt7621"
-      PROFILE: "netgear_r6220"
+      TARGET: "ath79/generic"
+      PROFILE: "tplink_archer-c7-v1"
     steps:
-      - run: bash ./meta
+      - run: apk add alpine-sdk gnupg bash bzip2 coreutils curl file findutils gawk grep linux-headers ncurses-dev outils-signify perl python3 rsync unzip wget xz zlib-dev
+      - checkout
+      - run: bash ./meta image
+      - run: ls ./bin/openwrt/snapshot/$TARGET/*sysupgrade.bin
 
-  dockertest-debian:
+  test-debian:
     docker:
-      - image: "aparcar/openwrt-metabuilder:debian"
+      - image: "debian:latest"
     environment:
-      TARGET: "ramips/mt7621"
-      PROFILE: "netgear_r6220"
+      TARGET: "ath79/generic"
+      PROFILE: "tplink_archer-c7-v1"
     steps:
-      - run: bash ./meta
+      - run: apt-get update -qq
+      - run: apt-get install -y build-essential curl file gawk gettext git libncurses5-dev libssl-dev python3 signify-openbsd subversion swig unzip wget zlib1g-dev
+      - checkout
+      - run: bash ./meta image
+      - run: ls ./bin/openwrt/snapshot/$TARGET/*sysupgrade.bin
+
+  deploy-docker:
+    machine:
+      image: ubuntu-1604:201903-01
+    environment:
+      DOCKER_IMAGE: "aparcar/openwrt-metabuilder"
+    steps:
+      - checkout
+      - run: docker login -u "$DOCKER_USER" -p "$DOCKER_PASS"
+      - run: docker push "$DOCKER_IMAGE"
 
 workflows:
   version: 2
-  build:
+  build_test_deploy:
     jobs:
-      - dockerbuild
-#      - dockertest-alpine:
-#          requires:
-#            - dockerbuild
-#      - dockertest-debian:
-#          requires:
-#            - dockerbuild
+      - build-docker
+      - test-alpine
+      - test-debian
+      - deploy-docker:
+          filters:
+            branches:
+              only:
+                - master
+          requires:
+            - build-docker
+            - test-alpine
+            - test-debian
