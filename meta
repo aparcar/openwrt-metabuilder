@@ -8,7 +8,7 @@ ROOT_DIR="$PWD" # where the script is
 DISTRO="${DISTRO:-openwrt}" # the folder where to store created files
 VERSION="${VERSION:-snapshot}" # default version
 IB_VERSION="${IB_VERSION:-$VERSION}" # ImabeBuilder version if different to distro version
-BASE_URL="${BASE_URL:-https://downloads.openwrt.org}" # download imagebuilders
+FILE_HOST="${FILE_HOST:-downloads.openwrt.org}" # download imagebuilders
 BASE_PATH="$DISTRO/$VERSION/$TARGET" # structure for storing stuff
 IB_DIR="$ROOT_DIR/imagebuilder/$BASE_PATH" # where to store imagebuilders
 BIN_DIR="${BIN_DIR:-$ROOT_DIR/bin/$BASE_PATH}" # where to store created images
@@ -16,9 +16,9 @@ IB="imagebuilder" # search sha256sums for this string to find imagebuilder
 BUILD_KEY="${BUILD_KEY:-$ROOT_DIR/key-build}"
 
 [ "$IB_VERSION" != "snapshot" ] && {
-    TARGETS_URL="$BASE_URL/releases/$IB_VERSION/targets/$TARGET"
+    DOWNLOAD_PATH="releases/$IB_VERSION/targets/$TARGET"
 } || {
-    TARGETS_URL="$BASE_URL/snapshots/targets/$TARGET"
+    DOWNLOAD_PATH="snapshots/targets/$TARGET"
 }
 
 # parse the sha256sums file to determine the ImageBuilder name
@@ -64,9 +64,9 @@ download() {
     cd "$IB_DIR"
 
     echo "download checksums and signature"
-    curl "$TARGETS_URL/sha256sums" -sS -o sha256sums
-    curl "$TARGETS_URL/sha256sums.asc" -fs -o sha256sums.asc || true
-    curl "$TARGETS_URL/sha256sums.sig" -fs -o sha256sums.sig || true
+    curl "https://$FILE_HOST/$DOWNLOAD_PATH/sha256sums" -sS -o sha256sums
+    curl "https://$FILE_HOST/$DOWNLOAD_PATH/sha256sums.asc" -fs -o sha256sums.asc || true
+    curl "https://$FILE_HOST/$DOWNLOAD_PATH/sha256sums.sig" -fs -o sha256sums.sig || true
 
     if [ ! -f sha256sums.asc ] && [ ! -f sha256sums.sig ]; then
         die "Missing sha256sums signature files"
@@ -109,7 +109,8 @@ download() {
         echo "remove outdated ImageBuilder files"
         find . ! -name 'sha256sums.*' -type f -exec rm -f {} +
         echo "download ImageBuilder"
-        wget "$TARGETS_URL/$ib_archive_name" -O "$ib_archive_name"
+        #wget "$DOWNLOAD_PATH/$ib_archive_name" -O "$ib_archive_name"
+        rsync -av "$FILE_HOST::downloads/$DOWNLOAD_PATH/$ib_archive_name" . || exit 1
         tar Jxf "$IB_DIR/$ib_archive_name" --strip=1 --overwrite
         # add Makefile which support package_list and  manifest
         # also modify Makefile based on DISTRO and VERSION

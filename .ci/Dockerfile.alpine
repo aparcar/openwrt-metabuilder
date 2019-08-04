@@ -2,7 +2,6 @@ FROM alpine:latest
 
 RUN apk update && \
     apk add alpine-sdk \
-            gnupg \
             bash \
             bzip2 \
             coreutils \
@@ -10,6 +9,7 @@ RUN apk update && \
             file \
             findutils \
             gawk \
+            gnupg \
             grep \
             linux-headers \
             ncurses-dev \
@@ -17,6 +17,7 @@ RUN apk update && \
             perl \
             python2 \
             python3 \
+            rsync \
             rsync \
             unzip \
             wget \
