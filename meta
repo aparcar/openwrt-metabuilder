@@ -4,6 +4,8 @@
 
 set -e
 
+[ -n "$DEBUG" ] && set -x
+
 ROOT_DIR="$PWD" # where the script is
 DISTRO="${DISTRO:-openwrt}" # the folder where to store created files
 VERSION="${VERSION:-snapshot}" # default version

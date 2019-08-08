@@ -1,4 +1,7 @@
-dockerbuild:
+variables:
+  DEBUG: 1
+
+build:
   image: docker:latest
   stage: build
   services:
@@ -10,20 +13,48 @@ dockerbuild:
     - docker build -t "$CI_REGISTRY_IMAGE:debian$CI_COMMIT_REF_SLUG" -f ".ci/Dockerfile.debian" .
     - docker push "$CI_REGISTRY_IMAGE"
 
-dockertest-alpine:
+test-alpine-1806:
+  image: "$CI_REGISTRY_IMAGE:alpine$CI_COMMIT_REF_SLUG"
+  stage: test
+  variables:
+    VERSION: "18.06.4"
+    TARGET: "ar71xx/generic"
+    PROFILE: "archer-c7-v4"
+  script:
+    - bash ./meta image
+    - ls ./bin/openwrt/$VERSION/$TARGET/*sysupgrade.bin
+
+test-alpine-snapshot:
   image: "$CI_REGISTRY_IMAGE:alpine$CI_COMMIT_REF_SLUG"
   stage: test
   variables:
     TARGET: "ath79/generic"
     PROFILE: "tplink_archer-c7-v1"
   script:
-    - bash ./meta
+    - bash ./meta image
+    - ls ./bin/openwrt/snapshot/$TARGET/*sysupgrade.bin
 
-dockertest-debian:
+test-debian-snapshot:
   image: "$CI_REGISTRY_IMAGE:debian$CI_COMMIT_REF_SLUG"
   stage: test
   variables:
     TARGET: "ath79/generic"
     PROFILE: "tplink_archer-c7-v1"
   script:
-    - bash ./meta
+    - bash ./meta image
+    - ls ./bin/openwrt/snapshot/$TARGET/*sysupgrade.bin
+
+deploy:
+  image: docker:latest
+  only:
+    - master
+  stage: deploy
+  services:
+    - docker:dind
+  before_script:
+    - docker login -u "$DOCKER_USER" -p "$DOCKER_PASS"
+  script:
+    - docker build -t "aparcar/openwrt-metabuilder:alpine" -f ".ci/Dockerfile.alpine" .
+    - docker build -t "aparcar/openwrt-metabuilder:debian" -f ".ci/Dockerfile.debian" .
+    - docker tag "aparcar/openwrt-metabuilder:debian" "aparcar/openwrt-metabuilder:latest"
+    - docker push "aparcar/openwrt-metabuilder"
