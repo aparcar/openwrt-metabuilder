@@ -203,5 +203,10 @@ make "$1" \
     PACKAGES="$PACKAGES" \
     BIN_DIR="$BIN_DIR" \
     EXTRA_IMAGE_NAME="$EXTRA_IMAGE_NAME" \
-    FILES="$FILES"
+    FILES="$FILES" \
+	JSON_ADD_IMAGE_INFO=y
 )
+
+#[ "$1" = "image" ] && (cd "$IB_DIR" &&
+#make "jsonmergeimageinfo" OUTPUT_DIR="$ROOT_DIR/bin/$DISTRO/$VERSION_PATH"
+#)
