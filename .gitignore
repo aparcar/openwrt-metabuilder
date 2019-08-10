@@ -1,4 +1,5 @@
 bin/
+gpg/
 imagebuilder/
 usign/
 .meta_setup

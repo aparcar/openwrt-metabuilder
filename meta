@@ -17,6 +17,10 @@ BIN_DIR="${BIN_DIR:-$ROOT_DIR/bin/$BASE_PATH}" # where to store created images
 IB="imagebuilder" # search sha256sums for this string to find imagebuilder
 BUILD_KEY="${BUILD_KEY:-$ROOT_DIR/key-build}"
 
+mkdir -p "$ROOT_DIR/gpg"
+chmod 700 "$ROOT_DIR/gpg"
+export GNUPGHOME="$ROOT_DIR/gpg"
+
 [ "$IB_VERSION" != "snapshot" ] && {
     DOWNLOAD_PATH="releases/$IB_VERSION/targets/$TARGET"
 } || {
