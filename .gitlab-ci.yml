@@ -9,8 +9,8 @@ build:
   before_script:
     - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
   script:
-    - docker build -t "$CI_REGISTRY_IMAGE:alpine$CI_COMMIT_REF_SLUG" -f ".ci/Dockerfile.alpine" .
-    - docker build -t "$CI_REGISTRY_IMAGE:debian$CI_COMMIT_REF_SLUG" -f ".ci/Dockerfile.debian" .
+    - docker build --pull -t "$CI_REGISTRY_IMAGE:alpine$CI_COMMIT_REF_SLUG" -f ".ci/Dockerfile.alpine" .
+    - docker build --pull -t "$CI_REGISTRY_IMAGE:debian$CI_COMMIT_REF_SLUG" -f ".ci/Dockerfile.debian" .
     - docker push "$CI_REGISTRY_IMAGE"
 
 test-alpine-1806:
@@ -54,7 +54,7 @@ deploy:
   before_script:
     - docker login -u "$DOCKER_USER" -p "$DOCKER_PASS"
   script:
-    - docker build -t "aparcar/openwrt-metabuilder:alpine" -f ".ci/Dockerfile.alpine" .
-    - docker build -t "aparcar/openwrt-metabuilder:debian" -f ".ci/Dockerfile.debian" .
+    - docker build --pull -t "aparcar/openwrt-metabuilder:alpine" -f ".ci/Dockerfile.alpine" .
+    - docker build --pull -t "aparcar/openwrt-metabuilder:debian" -f ".ci/Dockerfile.debian" .
     - docker tag "aparcar/openwrt-metabuilder:debian" "aparcar/openwrt-metabuilder:latest"
     - docker push "aparcar/openwrt-metabuilder"
