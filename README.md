@@ -8,11 +8,11 @@ Extra variables like `$PACKAGES` are forwarded to the ImageBuilder make call.
 
 Build `ar71xx/generic/tl-wr710n-v2.1` with latest (17.01.4) release:
 
-    PROFILE="tl-wr710n-v2.1" TARGET="ar71xx" SUBTARGET="generic" ./meta
+    PROFILE="tl-wr710n-v2.1" TARGET="ar71xx/generic" ./meta
 
 Build latest snapshot of the same target/profile combo (both work):
 
-    PROFILE="tl-wr710n-v2.1" RELEASE=snapshots TARGET="ar71xx" SUBTARGET="generic" ./meta
+    PROFILE="tl-wr710n-v2.1" RELEASE=snapshots TARGET="ar71xx/generic" ./meta
 
 ### Custom repositories
 
@@ -22,7 +22,7 @@ which use additional repositories, it is possible to replace the
 
 You may setup extra repositories exporting the following variable:
 
-    export REPOS="""src/gz reboot_core http://downloads.openwrt.org/releases/{{ ib_version }}/targets/{{ target }}/{{ subtarget }}/packages
+    export REPOS="""src/gz reboot_core http://downloads.openwrt.org/releases/{{ ib_version }}/targets/{{ target }}/packages
     src/gz reboot_base http://downloads.openwrt.org/releases/{{ ib_version }}/packages/{{ pkg_arch }}/base
     src/gz reboot_luci http://downloads.openwrt.org/releases/{{ ib_version }}/packages/{{ pkg_arch }}/luci
     src/gz reboot_packages http://downloads.openwrt.org/releases/{{ ib_version }}/packages/{{ pkg_arch }}/packages
@@ -40,4 +40,3 @@ The following variables are automatically replaced:
 * `{{ ib_version }}` OpenWrt ImageBuilder version
 * `{{ pkg_arch }}` Automatically determined package architecture
 * `{{ target }}`
-* `{{ subtarget }}`
