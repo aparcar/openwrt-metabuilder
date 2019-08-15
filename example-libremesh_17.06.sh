@@ -12,6 +12,7 @@ src/gz reboot_routing http://downloads.openwrt.org/releases/{{ ib_version }}/pac
 src/gz reboot_telephony http://downloads.openwrt.org/releases/{{ ib_version }}/packages/{{ pkg_arch }}/telephony
 src imagebuilder file:packages
 src/gz libremesh_v1706 http://downloads.libremesh.org/releases/{{ version }}/packages/{{ pkg_arch }}/libremesh/
+src/gz libremap http://downloads.libremesh.org/releases/{{ version }}/packages/{{ pkg_arch }}/libremap/
 src/gz lm_profiles http://chef.libremesh.org/network-profiles/"""
 
 ./meta image
