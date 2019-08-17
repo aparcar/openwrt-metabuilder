@@ -113,7 +113,7 @@ download() {
         ib_archive_name="$(get_ib_archive_name)"
         echo "sha256 doesn't match or ImageBuilder file wasn't downloaded yet."
         echo "remove outdated ImageBuilder files"
-        find . ! -name 'sha256sums.*' -type f -exec rm -f {} +
+        find . ! -name 'sha256sums.*' -delete
         echo "download ImageBuilder"
         #wget "$DOWNLOAD_PATH/$ib_archive_name" -O "$ib_archive_name"
         rsync -av "$FILE_HOST::downloads/$DOWNLOAD_PATH/$ib_archive_name" . || exit 1
