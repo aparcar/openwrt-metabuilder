@@ -10,10 +10,10 @@ ROOT_DIR="$PWD" # where the script is
 IB="imagebuilder" # search sha256sums for this string to find imagebuilder
 BUILD_KEY="${BUILD_KEY:-$ROOT_DIR/key-build}"
 DISTRO="${DISTRO:-openwrt}" # the folder where to store created files
-VERSION="${VERSION:-snapshot}" # default version
+VERSION="${VERSION:-snapshots}" # default version
 IB_VERSION="${IB_VERSION:-$VERSION}" # ImabeBuilder version if different to distro version
 FILE_HOST="${FILE_HOST:-downloads.openwrt.org}" # download imagebuilders
-[ "$IB_VERSION" != "snapshot" ] && {
+[ "$IB_VERSION" != "snapshots" ] && {
     BASE_PATH="releases/$IB_VERSION/targets/$TARGET"
 } || {
     BASE_PATH="snapshots/targets/$TARGET"

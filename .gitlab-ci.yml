@@ -22,7 +22,7 @@ test-alpine-1806:
     PROFILE: "archer-c7-v4"
   script:
     - bash ./meta image
-    - ls ./bin/openwrt/$VERSION/$TARGET/*sysupgrade.bin
+    - ls ./bin/openwrt/releases/$VERSION/targets/$TARGET/*sysupgrade.bin
 
 test-alpine-snapshot:
   image: "$CI_REGISTRY_IMAGE:alpine$CI_COMMIT_REF_SLUG"
@@ -32,7 +32,7 @@ test-alpine-snapshot:
     PROFILE: "tplink_archer-c7-v1"
   script:
     - bash ./meta image
-    - ls ./bin/openwrt/snapshot/$TARGET/*sysupgrade.bin
+    - ls ./bin/openwrt/snapshots/targets/$TARGET/*sysupgrade.bin
 
 test-debian-snapshot:
   image: "$CI_REGISTRY_IMAGE:debian$CI_COMMIT_REF_SLUG"
@@ -42,7 +42,7 @@ test-debian-snapshot:
     PROFILE: "tplink_archer-c7-v1"
   script:
     - bash ./meta image
-    - ls ./bin/openwrt/snapshot/$TARGET/*sysupgrade.bin
+    - ls ./bin/openwrt/snapshots/targets/$TARGET/*sysupgrade.bin
 
 deploy:
   image: docker:latest
