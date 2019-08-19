@@ -14,12 +14,13 @@ VERSION="${VERSION:-snapshots}" # default version
 IB_VERSION="${IB_VERSION:-$VERSION}" # ImabeBuilder version if different to distro version
 FILE_HOST="${FILE_HOST:-downloads.openwrt.org}" # download imagebuilders
 [ "$IB_VERSION" != "snapshots" ] && {
-    BASE_PATH="releases/$IB_VERSION/targets/$TARGET"
+    VERSION_PATH="releases/$IB_VERSION"
 } || {
-    BASE_PATH="snapshots/targets/$TARGET"
+    VERSION_PATH="snapshots"
 }
-IB_DIR="$ROOT_DIR/imagebuilder/$BASE_PATH" # where to store imagebuilders
-BIN_DIR="${BIN_DIR:-$ROOT_DIR/bin/$DISTRO/$BASE_PATH}" # where to store created images
+TARGET_PATH="$VERSION_PATH/targets/$TARGET"
+IB_DIR="$ROOT_DIR/imagebuilder/$TARGET_PATH" # where to store imagebuilders
+BIN_DIR="${BIN_DIR:-$ROOT_DIR/bin/$DISTRO/$TARGET_PATH}" # where to store created images
 
 mkdir -p "$ROOT_DIR/gpg"
 chmod 700 "$ROOT_DIR/gpg"
@@ -80,9 +81,9 @@ download() {
     cd "$IB_DIR"
 
     echo "download checksums and signature"
-    curl "https://$FILE_HOST/$BASE_PATH/sha256sums" -sS -o sha256sums
-    curl "https://$FILE_HOST/$BASE_PATH/sha256sums.asc" -fs -o sha256sums.asc || true
-    curl "https://$FILE_HOST/$BASE_PATH/sha256sums.sig" -fs -o sha256sums.sig || true
+    curl "https://$FILE_HOST/$TARGET_PATH/sha256sums" -sS -o sha256sums
+    curl "https://$FILE_HOST/$TARGET_PATH/sha256sums.asc" -fs -o sha256sums.asc || true
+    curl "https://$FILE_HOST/$TARGET_PATH/sha256sums.sig" -fs -o sha256sums.sig || true
 
     if [ ! -f sha256sums.asc ] && [ ! -f sha256sums.sig ]; then
         die "Missing sha256sums signature files"
@@ -125,7 +126,7 @@ download() {
         echo "remove outdated ImageBuilder files"
         find . ! -name 'sha256sums.*' -delete
         echo "download ImageBuilder"
-        rsync -av "$FILE_HOST::downloads/$BASE_PATH/$ib_archive_name" . || exit 1
+        rsync -av "$FILE_HOST::downloads/$TARGET_PATH/$ib_archive_name" . || exit 1
         tar Jxf "$IB_DIR/$ib_archive_name" --strip=1 --overwrite
         # add Makefile which support package_list and  manifest
         # also modify Makefile based on DISTRO and VERSION
