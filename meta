@@ -19,7 +19,7 @@ FILE_HOST="${FILE_HOST:-downloads.openwrt.org}" # download imagebuilders
     VERSION_PATH="snapshots"
 }
 TARGET_PATH="$VERSION_PATH/targets/$TARGET"
-IB_DIR="$ROOT_DIR/imagebuilder/$TARGET_PATH" # where to store imagebuilders
+IB_DIR="$ROOT_DIR/imagebuilder/$DISTRO/$TARGET_PATH" # where to store imagebuilders
 BIN_DIR="${BIN_DIR:-$ROOT_DIR/bin/$DISTRO/$TARGET_PATH}" # where to store created images
 
 mkdir -p "$ROOT_DIR/gpg"
