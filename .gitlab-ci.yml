@@ -30,6 +30,8 @@ test-alpine-1806:
     TARGET: "ar71xx/generic"
     PROFILE: "archer-c7-v4"
   script:
+    - bash ./meta info
+    - bash ./meta package_list
     - bash ./meta image
     - ls ./bin/openwrt/releases/$VERSION/targets/$TARGET/*sysupgrade.bin
 
@@ -40,6 +42,8 @@ test-alpine-snapshot:
     TARGET: "ath79/generic"
     PROFILE: "tplink_archer-c7-v1"
   script:
+    - bash ./meta info
+    - bash ./meta package_list
     - bash ./meta image
     - ls ./bin/openwrt/snapshots/targets/$TARGET/*sysupgrade.bin
 
@@ -50,6 +54,8 @@ test-debian-snapshot:
     TARGET: "ath79/generic"
     PROFILE: "tplink_archer-c7-v1"
   script:
+    - bash ./meta info
+    - bash ./meta package_list
     - bash ./meta image
     - ls ./bin/openwrt/snapshots/targets/$TARGET/*sysupgrade.bin
 
