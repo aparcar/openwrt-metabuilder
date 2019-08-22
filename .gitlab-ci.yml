@@ -13,6 +13,15 @@ build:
     - docker build --pull -t "$CI_REGISTRY_IMAGE:debian$CI_COMMIT_REF_SLUG" -f ".ci/Dockerfile.debian" .
     - docker push "$CI_REGISTRY_IMAGE"
 
+test-examples:
+  image: "$CI_REGISTRY_IMAGE:alpine$CI_COMMIT_REF_SLUG"
+  stage: test
+  script:
+    - |
+        for example in $(ls example-*.sh); do
+            bash "$example"
+        done
+
 test-alpine-1806:
   image: "$CI_REGISTRY_IMAGE:alpine$CI_COMMIT_REF_SLUG"
   stage: test
