@@ -15,9 +15,19 @@ do_build() {
     . "$PROFILE_PATH/settings.sh"
   fi
   . "$PROFILE_PATH/$3/settings.sh"
+  FILESDIR="$(mktemp -d)"
+  if [ -d "$PWD/communities/$1/files" ]; then
+    cp -r "$PWD/communities/$1/files/." "$FILESDIR/"
+  fi
+  if [ -d "$PROFILE_PATH/files" ]; then
+    cp -r "$PROFILE_PATH/files/." "$FILESDIR/"
+  fi
+  if [ -d "$PROFILE_PATH/$3/files" ]; then
+    cp -r "$PROFILE_PATH/$3/files/." "$FILESDIR/"
+  fi
   set -x
   export BIN_DIR="$PROFILE_PATH/bin/$3"
-  export FILES="$PROFILE_PATH/$3/files"
+  export FILES="$FILESDIR"
   set +x
   /usr/bin/env bash ./meta image \
     && : \
@@ -78,4 +88,3 @@ if [ ! -f "$PROFILE_PATH/$3/settings.sh" ]; then
 fi
 
 do_build "$1" "$2" "$3"
-
