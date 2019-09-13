@@ -1,7 +1,7 @@
 # massmesh ./build usage
 
 ### Build a meshnode profile for espressobin
-`./build massmesh meshnode espressobin`
+`./build massmesh meshnode globalscale_espressobin`
 
 ### Build a for a wireless meshradio for nanostation 
 `./build massmesh meshradio ns5ac-loco`
