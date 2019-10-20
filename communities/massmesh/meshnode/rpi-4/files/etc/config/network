@@ -4,6 +4,8 @@ config interface 'loopback'
 	option ipaddr '127.0.0.1'
 	option netmask '255.0.0.0'
 
+config globals 'globals'
+
 config interface 'lan'
 	option type 'bridge'
 	option ifname 'eth0'
