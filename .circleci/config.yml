@@ -16,11 +16,14 @@ jobs:
           name: Patch Bin Directory
           command: sed -i '/BIN_DIR=/ s/$PROFILE_PATH\/bin\/$3/$PWD\/bin\/$1\/$2\/$3/' ./build
       - run:
-          name: Build Mesh Node PC Engines APU2/APU3
-          command: './build massmesh meshnode apu2'
-      - run:
           name: Build Mesh Node Espressobin
           command: './build massmesh meshnode globalscale_espressobin'
+      - run:
+          name: Build Mesh Node Raspberry Pi 4
+          command: './build massmesh meshnode rpi-4'
+      - run:
+          name: Build Mesh Node PC Engines APU2/APU3
+          command: './build massmesh meshnode apu2'
       - run:
          name: Build Mesh Radio NS 5AC Loco
          command: './build massmesh meshradio ubnt_nanostation-ac-loco'
