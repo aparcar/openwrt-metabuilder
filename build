@@ -43,7 +43,7 @@ if [ -z "$1" ]; then
   echo "[$0] Please specify an available community:"
   for x in $(ls $PWD/communities/); do echo "- $x" ; done
   echo "[$0] Example:"
-  echo "% $0 massmesh meshradio ns5ac-loco"
+  echo "% $0 massmesh meshnode rpi-4"
   exit 1
 fi
 
@@ -58,7 +58,7 @@ fi
 if [ -z "$2" ]; then
   show_help
   echo "Please specify a build profile:"
-  for x in $(ls $COMMUNITY_PATH/); do echo "- $x" ; done
+  for x in $(ls $COMMUNITY_PATH/ | grep -v files); do echo "- $x" ; done
   exit 1
 fi
 
