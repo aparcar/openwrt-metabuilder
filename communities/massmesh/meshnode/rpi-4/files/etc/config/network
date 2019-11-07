@@ -25,3 +25,7 @@ config interface 'mesh'
 	option auto '1'
 	option ifname 'eth0.3'
 	option type 'bridge'
+
+config interface 'wan'
+	option ifname 'eth1'
+	option proto 'dhcp'
