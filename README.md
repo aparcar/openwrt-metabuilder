@@ -6,15 +6,30 @@
 ### Build a for a wireless meshradio for nanostation 
 `./build massmesh meshradio ns5ac-loco`
 
-### More info
+### Examples
 ```
-# Usage:
-# ./build <community> <build-profile> <device-name>
-# 
-[./build] Please specify an available community:
-- massmesh
-[./build] Example:
-% ./build massmesh meshradio ns5ac-loco
+% ./build massmesh
+Please specify a build profile:
+- meshnode
+- meshradio
+
+% ./build massmesh meshradio
+[./build] Please specify a device:
+- ubnt_nanostation-ac-loco
+- ubnt_unifiac-mesh
+
+% ./build massmesh meshradio ubnt_unifiac-mesh
+....building!
+
+% ./build massmesh meshnode
+[./build] Please specify a device:
+- apu2
+- globalscale_espressobin
+- rpi-4
+
+% ./build massmesh meshnode rpi-4
+....building!
+
 ```
 
 # meta ImageBuilder (Called by ./build)

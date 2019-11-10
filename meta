@@ -20,7 +20,6 @@ else
 	IB_DIR="/dev/shm/imagebuilder/$BASE_PATH"
 fi
 
-echo IB_DIR==${IB_DIR}
 BIN_DIR="${BIN_DIR:-$ROOT_DIR/bin/$BASE_PATH}"  # where to store created images
 IB="imagebuilder"   # search sha256sums for this string to find imagebuilder
 BUILD_KEY="${BUILD_KEY:-$ROOT_DIR/key-build}"
@@ -105,7 +104,7 @@ download() {
 		echo "sha256 doesn't match or ImageBuilder file wasn't downloaded yet."
 		echo "remove outdated ImageBuilder files"
 		find . ! -name 'sha256sums.*' -type f -exec rm -f {} +
-		echo "download ImageBuilder"
+		echo "download ImageBuilder: $TARGETS_URL/$ib_archive_name"
 		if [ x"$ARIA2C" == "x" ]; then
 			wget "$TARGETS_URL/$ib_archive_name" -O "$ib_archive_name"
 		else
