@@ -61,6 +61,10 @@ meta_setup() {
     curl 'https://git.openwrt.org/?p=keyring.git;a=blob_plain;f=gpg/17E1CE16.asc' | gpg --import \
             && echo '6768C55E79B032D77A28DA5F0F20257417E1CE16:6:' | gpg --import-ownertrust
 
+    # OpenWrt Release Builder (18.06 Signing Key v2)
+    curl 'https://git.openwrt.org/?p=keyring.git;a=blob_plain;f=gpg/15807931.asc' | gpg --import \
+            && echo 'AD0507363D2BCE9C9E36CEC4FBCB78F015807931:6:' | gpg --import-ownertrust
+
     # LEDE Build System (LEDE usign key for unattended build jobs)
     curl 'https://git.openwrt.org/?p=keyring.git;a=blob_plain;f=usign/b5043e70f9a75cde' --create-dirs \
             -o ./usign/b5043e70f9a75cde
@@ -68,6 +72,10 @@ meta_setup() {
     # Public usign key for unattended snapshot builds
     curl 'https://git.openwrt.org/?p=keyring.git;a=blob_plain;f=usign/b5043e70f9a75cde' --create-dirs \
             -o ./usign/b5043e70f9a75cde
+
+    # Public usign key for 18.06 release builds
+    curl 'https://git.openwrt.org/?p=keyring.git;a=blob_plain;f=usign/1035ac73cc4e59e3' --create-dirs \
+            -o ./usign/1035ac73cc4e59e3
 
     # Public usign key for 19.07 release builds
     curl 'https://git.openwrt.org/?p=keyring.git;a=blob_plain;f=usign/f94b9dd6febac963' --create-dirs \
