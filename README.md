@@ -1,3 +1,5 @@
+This code is no longer maintaned (tho likely works). It was initially created to be used by [ASU](https://github.com/aparcar/asu/) which however switched to a full Python implementation.
+
 # meta ImageBuilder
 
 Instead of downloading (and updating) ImageBuilders manually, this script does
