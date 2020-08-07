@@ -212,5 +212,10 @@ make "$1" \
     BIN_DIR="$BIN_DIR" \
     DISABLED_SERVICES="$DISABLED_SERVICES" \
     EXTRA_IMAGE_NAME="$EXTRA_IMAGE_NAME" \
-    FILES="$FILES"
+    FILES="$FILES" \
+	JSON_ADD_IMAGE_INFO=y
 )
+
+#[ "$1" = "image" ] && (cd "$IB_DIR" &&
+#make "jsonmergeimageinfo" OUTPUT_DIR="$ROOT_DIR/bin/$DISTRO/$VERSION_PATH"
+#)
